@@ -36,7 +36,6 @@ DeviceAllow=/dev/uinput
 DevicePolicy=closed
 
 InaccessiblePaths=/mnt
-InaccessiblePaths=/run
 
 Type=exec
 ExecStart=${CMAKE_INSTALL_PREFIX}/bin/logid
