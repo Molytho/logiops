@@ -1,13 +1,45 @@
 [Unit]
 Description=Logitech Configuration Daemon
-StartLimitIntervalSec=0
-After=multi-user.target
-Wants=multi-user.target
 
 [Service]
-Type=simple
+ProtectProc=invisible
+ProcSubset=pid
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+UMask=0077
+MemoryDenyWriteExecute=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateIPC=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+ProtectHostname=yes
+ProtectClock=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+IPAddressDeny=any
+SocketBindDeny=any
+
+DeviceAllow=char-hidraw
+DeviceAllow=/dev/uinput
+DevicePolicy=closed
+
+InaccessiblePaths=/mnt
+InaccessiblePaths=/run
+
+Type=exec
 ExecStart=${CMAKE_INSTALL_PREFIX}/bin/logid
-User=root
 
 [Install]
 WantedBy=graphical.target
