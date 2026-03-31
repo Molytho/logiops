@@ -48,8 +48,7 @@ namespace logid {
 
     protected:
         DeviceManager(std::shared_ptr<Configuration> config,
-                      std::shared_ptr<InputDevice> virtual_input,
-                      std::shared_ptr<ipcgull::server> server);
+                      std::shared_ptr<InputDevice> virtual_input);
 
         void addDevice(std::string path) final;
 
@@ -62,16 +61,8 @@ namespace logid {
         [[nodiscard]]
         std::vector<std::shared_ptr<Receiver>> listReceivers() const;
 
-        std::shared_ptr<ipcgull::server> _server;
         std::shared_ptr<Configuration> _config;
         std::shared_ptr<InputDevice> _virtual_input;
-
-        std::shared_ptr<ipcgull::node> _root_node;
-
-        std::shared_ptr<ipcgull::node> _device_node;
-        std::shared_ptr<ipcgull::node> _receiver_node;
-
-        std::shared_ptr<Configuration::IPC> _ipc_config;
 
         std::map<std::string, std::shared_ptr<Device>> _devices;
         std::map<std::string, std::shared_ptr<Receiver>> _receivers;

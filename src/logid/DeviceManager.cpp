@@ -28,18 +28,10 @@ using namespace logid;
 using namespace logid::backend;
 
 DeviceManager::DeviceManager(std::shared_ptr<Configuration> config,
-                             std::shared_ptr<InputDevice> virtual_input,
-                             std::shared_ptr<ipcgull::server> server) :
+                             std::shared_ptr<InputDevice> virtual_input) :
         backend::raw::DeviceMonitor(),
-        _server(std::move(server)), _config(std::move(config)),
-        _virtual_input(std::move(virtual_input)),
-        _root_node(ipcgull::node::make_root("")),
-        _device_node(ipcgull::node::make_root("devices")),
-        _receiver_node(ipcgull::node::make_root("receivers")) {
-    _ipc_config = _root_node->make_interface<Configuration::IPC>(_config.get());
-    _device_node->add_server(_server);
-    _receiver_node->add_server(_server);
-    _root_node->add_server(_server);
+        _config(std::move(config)),
+        _virtual_input(std::move(virtual_input)) {
 }
 
 std::shared_ptr<Configuration> DeviceManager::config() const {
@@ -48,14 +40,6 @@ std::shared_ptr<Configuration> DeviceManager::config() const {
 
 std::shared_ptr<InputDevice> DeviceManager::virtualInput() const {
     return _virtual_input;
-}
-
-std::shared_ptr<const ipcgull::node> DeviceManager::devicesNode() const {
-    return _device_node;
-}
-
-std::shared_ptr<const ipcgull::node> DeviceManager::receiversNode() const {
-    return _receiver_node;
 }
 
 void DeviceManager::addDevice(std::string path) {

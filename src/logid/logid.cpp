@@ -162,14 +162,6 @@ int main(int argc, char **argv) {
 
     init_workers(config->workers.value_or(defaults::workers));
 
-#ifdef USE_USER_BUS
-    auto server_bus = ipcgull::IPCGULL_USER;
-#else
-    auto server_bus = ipcgull::IPCGULL_SYSTEM;
-#endif
-
-    auto server = ipcgull::make_server(SERVICE_ROOT_NAME, server_root_node, server_bus);
-
     // Create a virtual input device
     try {
         virtual_input = std::make_unique<InputDevice>(virtual_input_name);
@@ -179,16 +171,11 @@ int main(int argc, char **argv) {
     }
 
     // Device manager runs on its own I/O thread asynchronously
-    auto device_manager = DeviceManager::make<DeviceManager>(config, virtual_input, server);
+    auto device_manager = DeviceManager::make<DeviceManager>(config, virtual_input);
 
     device_manager->enumerate();
 
-    try {
-        server->start();
-    } catch (const ipcgull::connection_failed &e) {
-        logPrintf(ERROR, "Lost IPC connection, terminating.");
-        return EXIT_FAILURE;
-    }
+    while (true);
 
     return EXIT_SUCCESS;
 }
