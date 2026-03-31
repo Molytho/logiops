@@ -26,16 +26,7 @@ const char* IntervalGesture::interface_name = "OnInterval";
 IntervalGesture::IntervalGesture(
         Device* device, config::IntervalGesture& config,
         const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name, {
-                {
-                        {"GetConfig", {this, &IntervalGesture::getConfig, {"interval", "threshold"}}},
-                        {"SetInterval", {this, &IntervalGesture::setInterval, {"interval"}}},
-                        {"SetThreshold", {this, &IntervalGesture::setThreshold, {"interval"}}},
-                        {"SetAction", {this, &IntervalGesture::setAction, {"type"}}}
-                },
-                {},
-                {}
-        }),
+        Gesture(device, parent, interface_name),
         _axis(0), _interval_pass_count(0), _config(config) {
     if (config.action) {
         try {

@@ -18,24 +18,21 @@
 #ifndef LOGID_ACTION_GESTURE_H
 #define LOGID_ACTION_GESTURE_H
 
-#include <utility>
 #include <actions/Action.h>
+#include <utility>
 
 namespace logid::actions {
     class InvalidGesture : public std::exception {
     public:
-        explicit InvalidGesture(std::string what = "") : _what(std::move(what)) {
-        }
+        explicit InvalidGesture(std::string what = "") : _what(std::move(what)) { }
 
-        [[nodiscard]] const char* what() const noexcept override {
-            return _what.c_str();
-        }
+        [[nodiscard]] const char *what() const noexcept override { return _what.c_str(); }
 
     private:
         std::string _what;
     };
 
-    class Gesture : public ipcgull::interface {
+    class Gesture {
     public:
         virtual void press(bool init_threshold) = 0;
 
@@ -49,25 +46,23 @@ namespace logid::actions {
 
         virtual ~Gesture() = default;
 
-        static std::shared_ptr<Gesture> makeGesture(Device* device,
-                                                    config::Gesture& gesture,
-                                                    const std::shared_ptr<ipcgull::node>& parent);
+        static std::shared_ptr<Gesture> makeGesture(Device *device, config::Gesture &gesture,
+            const std::shared_ptr<ipcgull::node> &parent = nullptr);
 
-        static std::shared_ptr<Gesture> makeGesture(
-                Device* device, const std::string& type,
-                config::Gesture& gesture,
-                const std::shared_ptr<ipcgull::node>& parent);
+        static std::shared_ptr<Gesture> makeGesture(Device *device, const std::string &type,
+            config::Gesture &gesture, const std::shared_ptr<ipcgull::node> &parent = nullptr);
 
     protected:
-        Gesture(Device* device,
-                std::shared_ptr<ipcgull::node> parent,
-                const std::string& name, tables t = {});
+        Gesture(Device *device, std::shared_ptr<ipcgull::node> parent, const std::string &name,
+            [[maybe_unused]] auto t) : Gesture(device, std::move(parent), name) { }
+
+        Gesture(Device *device, std::shared_ptr<ipcgull::node> parent, const std::string &name);
 
         mutable std::shared_mutex _config_mutex;
 
-        const std::shared_ptr<ipcgull::node> _node;
-        Device* _device;
+        const std::shared_ptr<ipcgull::node> _node = nullptr; //TODO: Needs to be deleted to that it can work
+        Device *_device;
     };
-}
+} // namespace logid::actions
 
-#endif //LOGID_ACTION_GESTURE_H
+#endif // LOGID_ACTION_GESTURE_H

@@ -26,15 +26,7 @@ const char* ThresholdGesture::interface_name = "OnRelease";
 ThresholdGesture::ThresholdGesture(
         Device* device, config::ThresholdGesture& config,
         const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name, {
-                {
-                        {"GetThreshold", {this, &ThresholdGesture::getThreshold, {"threshold"}}},
-                        {"SetThreshold", {this, &ThresholdGesture::setThreshold, {"threshold"}}},
-                        {"SetAction", {this, &ThresholdGesture::setAction, {"type"}}}
-                },
-                {},
-                {}
-        }), _config(config) {
+        Gesture(device, parent, interface_name), _config(config) {
     if (config.action) {
         try {
             _action = Action::makeAction(device, config.action.value(), _node);

@@ -16,24 +16,20 @@
  *
  */
 
+#include <actions/gesture/AxisGesture.h>
 #include <actions/gesture/Gesture.h>
-#include <utility>
+#include <actions/gesture/IntervalGesture.h>
+#include <actions/gesture/NullGesture.h>
 #include <actions/gesture/ReleaseGesture.h>
 #include <actions/gesture/ThresholdGesture.h>
-#include <actions/gesture/IntervalGesture.h>
-#include <actions/gesture/AxisGesture.h>
-#include <actions/gesture/NullGesture.h>
 #include <ipc_defs.h>
+#include <utility>
 
 using namespace logid;
 using namespace logid::actions;
 
-Gesture::Gesture(Device* device,
-                 std::shared_ptr<ipcgull::node> node,
-                 const std::string& name, tables t) :
-        ipcgull::interface(SERVICE_ROOT_NAME ".Gesture." + name, std::move(t)),
-        _node(std::move(node)), _device(device) {
-}
+Gesture::Gesture(Device *device, [[maybe_unused]] std::shared_ptr<ipcgull::node> node,
+    [[maybe_unused]] const std::string &name) : _device(device) { }
 
 namespace {
     template<typename T>
@@ -42,34 +38,25 @@ namespace {
     };
 
     template<typename T>
-    struct gesture_type<const T> : gesture_type<T> {
-    };
+    struct gesture_type<const T> : gesture_type<T> { };
 
     template<typename T>
-    struct gesture_type<T&> : gesture_type<T> {
-    };
+    struct gesture_type<T &> : gesture_type<T> { };
 
     template<typename T>
-    std::shared_ptr<Gesture> _makeGesture(
-            Device* device, T& gesture,
-            const std::shared_ptr<ipcgull::node>& parent) {
-        return parent->make_interface<typename gesture_type<T>::type>(
-                device, std::forward<T&>(gesture), parent);
+    std::shared_ptr<Gesture> _makeGesture(Device *device, T &gesture,
+        const std::shared_ptr<ipcgull::node> &parent) {
+        return std::make_shared<typename gesture_type<T>::type>(device, std::forward<T &>(gesture), parent);
     }
+} // namespace
+
+std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, config::Gesture &gesture,
+    const std::shared_ptr<ipcgull::node> &parent) {
+    return std::visit([&device, &parent](auto &&x) { return _makeGesture(device, x, parent); }, gesture);
 }
 
-std::shared_ptr<Gesture> Gesture::makeGesture(
-        Device* device, config::Gesture& gesture,
-        const std::shared_ptr<ipcgull::node>& parent) {
-    return std::visit([&device, &parent](auto&& x) {
-        return _makeGesture(device, x, parent);
-    }, gesture);
-}
-
-std::shared_ptr<Gesture> Gesture::makeGesture(
-        Device* device, const std::string& type,
-        config::Gesture& config,
-        const std::shared_ptr<ipcgull::node>& parent) {
+std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, const std::string &type,
+    config::Gesture &config, const std::shared_ptr<ipcgull::node> &parent) {
     if (type == AxisGesture::interface_name) {
         config = config::AxisGesture();
     } else if (type == IntervalGesture::interface_name) {

@@ -27,16 +27,7 @@ const char* AxisGesture::interface_name = "Axis";
 
 AxisGesture::AxisGesture(Device* device, config::AxisGesture& config,
                          const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name, {
-            {
-                    {"GetConfig", {this, &AxisGesture::getConfig, {"axis", "multiplier", "threshold"}}},
-                    {"SetThreshold", {this, &AxisGesture::setThreshold, {"threshold"}}},
-                    {"SetMultiplier", {this, &AxisGesture::setMultiplier, {"multiplier"}}},
-                    {"SetAxis", {this, &AxisGesture::setAxis, {"axis"}}}
-            },
-            {},
-            {}
-        }), _multiplier(1), _config(config) {
+        Gesture(device, parent, interface_name), _multiplier(1), _config(config) {
     if (_config.axis.has_value()) {
         if (std::holds_alternative<uint>(_config.axis.value())) {
             _input_axis = std::get<uint>(_config.axis.value());
