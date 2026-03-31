@@ -58,28 +58,6 @@ namespace logid::features {
 
         void _handleScroll(backend::hidpp20::HiresScroll::WheelStatus event);
 
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(HiresScroll* parent);
-
-            [[nodiscard]] std::tuple<bool, bool, bool> getConfig() const;
-
-            void setHires(bool hires);
-
-            void setInvert(bool invert);
-
-            void setTarget(bool target);
-
-            void setUp(const std::string& type);
-
-            void setDown(const std::string& type);
-
-        private:
-            config::HiresScroll& _parentConfig();
-
-            HiresScroll& _parent;
-        };
-
         std::shared_ptr<backend::hidpp20::HiresScroll> _hires_scroll;
         std::chrono::time_point<std::chrono::system_clock> _last_scroll;
         int16_t _last_direction = 0;
@@ -92,12 +70,6 @@ namespace logid::features {
 
         std::shared_ptr<actions::Gesture> _up_gesture;
         std::shared_ptr<actions::Gesture> _down_gesture;
-
-        std::shared_ptr<ipcgull::node> _node;
-        std::shared_ptr<ipcgull::node> _up_node;
-        std::shared_ptr<ipcgull::node> _down_node;
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 }
 
