@@ -19,53 +19,27 @@
 #ifndef LOGID_BACKEND_RAW_DEVICEMONITOR_H
 #define LOGID_BACKEND_RAW_DEVICEMONITOR_H
 
-#include <string>
-#include <mutex>
-#include <atomic>
 #include <memory>
+#include <string>
 
-extern "C"
-{
-struct udev;
-struct udev_monitor;
+extern "C" {
+    struct udev;
+    struct udev_monitor;
 }
 
 namespace logid::backend::raw {
     class IOMonitor;
 
-    static constexpr int max_tries = 5;
-    static constexpr int ready_backoff = 500;
+    constexpr int max_tries     = 5;
+    constexpr int ready_backoff = 500;
 
-    template<typename T>
-    class _deviceMonitorWrapper : public T {
-        friend class Device;
-
-    public:
-        template<typename... Args>
-        explicit _deviceMonitorWrapper(Args... args) : T(std::forward<Args>(args)...) {}
-
-        template<typename... Args>
-        static std::shared_ptr<T> make(Args... args) {
-            return std::make_shared<_deviceMonitorWrapper>(std::forward<Args>(args)...);
-        }
-    };
-
-    class DeviceMonitor {
+    class DeviceMonitor : public std::enable_shared_from_this<DeviceMonitor> {
     public:
         virtual ~DeviceMonitor();
 
         void enumerate();
 
         [[nodiscard]] std::shared_ptr<IOMonitor> ioMonitor() const;
-
-        template<typename T, typename... Args>
-        static std::shared_ptr<T> make(Args... args) {
-            auto device_monitor = _deviceMonitorWrapper<T>::make(std::forward<Args>(args)...);
-            device_monitor->_self = device_monitor;
-            device_monitor->ready();
-
-            return device_monitor;
-        }
 
     protected:
         DeviceMonitor();
@@ -77,25 +51,37 @@ namespace logid::backend::raw {
 
         virtual void removeDevice(std::string device) = 0;
 
-        template<typename T>
-        [[nodiscard]] std::weak_ptr<T> self() const {
-            return std::dynamic_pointer_cast<T>(_self.lock());
-        }
-
     private:
-        void _addHandler(const std::string& device, int tries = 0);
+        void _addHandler(const std::string &device, int tries = 0);
 
-        void _removeHandler(const std::string& device);
+        void _removeHandler(const std::string &device);
 
         std::shared_ptr<IOMonitor> _io_monitor;
 
-        struct udev* _udev_context;
-        struct udev_monitor* _udev_monitor;
+        udev *_udev_context;
+        udev_monitor *_udev_monitor;
         int _fd;
         bool _ready;
-
-        std::weak_ptr<DeviceMonitor> _self;
     };
-}
 
-#endif //LOGID_BACKEND_RAW_DEVICEMONITOR_H
+    template<class T>
+    struct DeviceMonitorImplHelper : public DeviceMonitor {
+        template<class... Args>
+        static std::shared_ptr<T> make(Args &&...args) {
+            static_assert(std::derived_from<T, DeviceMonitor>);
+            auto device_monitor = std::make_shared<T>(std::forward<Args>(args)...);
+            device_monitor->ready();
+            return device_monitor;
+        }
+
+        std::shared_ptr<T> shared_from_this() {
+            return std::dynamic_pointer_cast<T>(static_cast<T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this());
+        }
+
+        std::shared_ptr<const T> shared_from_this() const {
+            return std::dynamic_pointer_cast<T>(static_cast<const T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this());
+        }
+    };
+} // namespace logid::backend::raw
+
+#endif // LOGID_BACKEND_RAW_DEVICEMONITOR_H

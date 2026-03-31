@@ -19,30 +19,28 @@
 #ifndef LOGID_DEVICEMANAGER_H
 #define LOGID_DEVICEMANAGER_H
 
-#include <backend/raw/DeviceMonitor.h>
 #include <Device.h>
 #include <Receiver.h>
+#include <backend/raw/DeviceMonitor.h>
 
 namespace logid {
     class InputDevice;
 
-    class DeviceManager : public backend::raw::DeviceMonitor {
+    class DeviceManager : public backend::raw::DeviceMonitorImplHelper<DeviceManager> {
     public:
-
         [[nodiscard]] std::shared_ptr<Configuration> config() const;
 
         [[nodiscard]] std::shared_ptr<InputDevice> virtualInput() const;
 
-        void addExternalDevice(const std::shared_ptr<Device>& d);
+        void addExternalDevice(const std::shared_ptr<Device> &d);
 
-        void removeExternalDevice(const std::shared_ptr<Device>& d);
+        void removeExternalDevice(const std::shared_ptr<Device> &d);
 
-        std::mutex& mutex() const;
+        std::mutex &mutex() const;
+
+        DeviceManager(std::shared_ptr<Configuration> config, std::shared_ptr<InputDevice> virtual_input);
 
     protected:
-        DeviceManager(std::shared_ptr<Configuration> config,
-                      std::shared_ptr<InputDevice> virtual_input);
-
         void addDevice(std::string path) final;
 
         void removeDevice(std::string path) final;
@@ -75,6 +73,6 @@ namespace logid {
         std::set<int> _receiver_nicknames;
     };
 
-}
+} // namespace logid
 
-#endif //LOGID_DEVICEMANAGER_H
+#endif // LOGID_DEVICEMANAGER_H
