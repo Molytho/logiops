@@ -62,8 +62,6 @@ DPI::DPI(Device* device) : DeviceFeature(device), _config(device->activeProfile(
     } catch (hidpp20::UnsupportedFeature& e) {
         throw UnsupportedFeature();
     }
-
-    _ipc_interface = _device->ipcNode()->make_interface<IPC>(this);
 }
 
 void DPI::configure() {
@@ -126,84 +124,4 @@ void DPI::_fillDPILists(uint8_t sensor) {
             _dpi_lists.push_back(_adjustable_dpi->getSensorDPIList(i));
         }
     }
-}
-
-DPI::IPC::IPC(DPI* parent) : ipcgull::interface(
-        SERVICE_ROOT_NAME ".DPI", {
-                {"GetSensors", {this, &IPC::getSensors, {"sensors"}}},
-                {"GetDPIs", {this, &IPC::getDPIs, {"sensor"}, {"dpis", "dpiStep", "range"}}},
-                {"GetDPI", {this, &IPC::getDPI, {"sensor"}, {"dpi"}}},
-                {"SetDPI", {this, &IPC::setDPI, {"dpi", "sensor"}}}
-        }, {}, {}), _parent(*parent) {
-}
-
-uint8_t DPI::IPC::getSensors() const {
-    return _parent._dpi_lists.size();
-}
-
-std::tuple<std::vector<uint16_t>, uint16_t, bool> DPI::IPC::getDPIs(uint8_t sensor) const {
-    _parent._fillDPILists(sensor);
-    std::shared_lock lock(_parent._dpi_list_mutex);
-    auto& dpi_list = _parent._dpi_lists.at(sensor);
-    return {dpi_list.dpis, dpi_list.dpiStep, dpi_list.isRange};
-}
-
-uint16_t DPI::IPC::getDPI(uint8_t sensor) const {
-    std::shared_lock lock(_parent._config_mutex);
-    auto& config = _parent._config.get();
-
-    if (!config.has_value())
-        return _parent.getDPI(sensor);
-
-    if (std::holds_alternative<int>(config.value())) {
-        if (sensor == 0)
-            return std::get<int>(config.value());
-        else
-            return _parent.getDPI(sensor);
-    }
-
-    const auto& list = std::get<std::list<int>>(config.value());
-
-    if (list.size() > sensor) {
-        auto it = list.begin();
-        std::advance(it, sensor);
-        return *it;
-    } else {
-        return _parent.getDPI(sensor);
-    }
-}
-
-void DPI::IPC::setDPI(uint16_t dpi, uint8_t sensor) {
-    std::unique_lock lock(_parent._config_mutex);
-    auto& config = _parent._config.get();
-
-    if (!config.has_value())
-        config.emplace(std::list<int>());
-
-    if (std::holds_alternative<int>(config.value())) {
-        if (sensor == 0) {
-            config.value() = dpi;
-        } else {
-            auto list = std::list<int>(sensor + 1, 0);
-            *list.rbegin() = dpi;
-            *list.begin() = dpi;
-            config.value() = list;
-        }
-    } else {
-        auto& list = std::get<std::list<int>>(config.value());
-
-        while (list.size() <= sensor) {
-            list.emplace_back(0);
-        }
-
-        if (list.size() == (size_t) (sensor + 1)) {
-            *list.rbegin() = dpi;
-        } else {
-            auto it = list.begin();
-            std::advance(it, sensor);
-            *it = dpi;
-        }
-    }
-
-    _parent.setDPI(dpi, sensor);
 }
