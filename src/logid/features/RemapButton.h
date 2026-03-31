@@ -26,15 +26,14 @@
 namespace logid::features {
     class RemapButton;
 
-    class Button : public ipcgull::object {
+    class Button {
     public:
         typedef backend::hidpp20::ReprogControls::ControlInfo Info;
         typedef std::function<void(std::shared_ptr<actions::Action>)>
                 ConfigFunction;
 
         static std::shared_ptr<Button> make(
-                Info info, int index, Device* device, ConfigFunction conf_func,
-                const std::shared_ptr<ipcgull::node>& root, config::Button& config);
+                Info info, int index, Device* device, ConfigFunction conf_func, config::Button& config);
 
         void press();
 
@@ -43,8 +42,6 @@ namespace logid::features {
         void move(int16_t x, int16_t y);
 
         void setProfile(config::Button& config);
-
-        [[nodiscard]] std::shared_ptr<ipcgull::node> node() const;
 
         void configure() const;
 
@@ -57,21 +54,7 @@ namespace logid::features {
 
         Button(Info info, int index,
                Device* device, ConfigFunction conf_func,
-               const std::shared_ptr<ipcgull::node>& root,
                config::Button& config);
-
-        class IPC : public ipcgull::interface {
-        public:
-            IPC(Button* parent,
-                const Info& info);
-
-            void setAction(const std::string& type);
-
-        private:
-            Button& _button;
-        };
-
-        std::shared_ptr<ipcgull::node> _node;
 
         Device* _device;
         const ConfigFunction _conf_func;
@@ -85,8 +68,6 @@ namespace logid::features {
         bool _first_move{};
 
         std::weak_ptr<Button> _self;
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 
     class RemapButton : public DeviceFeature {
@@ -110,21 +91,7 @@ namespace logid::features {
         std::reference_wrapper<std::optional<config::RemapButton>> _config;
         std::map<uint16_t, std::shared_ptr<Button>> _buttons;
 
-        std::shared_ptr<ipcgull::node> _ipc_node;
-
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(RemapButton* parent);
-
-            [[nodiscard]] std::vector<std::shared_ptr<Button>> enumerate() const;
-
-        private:
-            RemapButton& _parent;
-        };
-
         EventHandlerLock<backend::hidpp::Device> _ev_handler;
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 }
 

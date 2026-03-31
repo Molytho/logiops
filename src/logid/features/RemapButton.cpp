@@ -35,8 +35,7 @@ static constexpr auto hidpp20_reprog_rebind =
          hidpp20::ReprogControls::ChangeRawXYDivert);
 
 RemapButton::RemapButton(Device* dev) : DeviceFeature(dev),
-                                        _config(dev->activeProfile().buttons),
-                                        _ipc_node(dev->ipcNode()->make_child("buttons")) {
+                                        _config(dev->activeProfile().buttons) {
     try {
         _reprog_controls = hidpp20::ReprogControls::autoVersion(
                 &dev->hidpp20());
@@ -72,11 +71,9 @@ RemapButton::RemapButton(Device* dev) : DeviceFeature(dev),
         };
         _buttons.emplace(control.second.controlID,
                          Button::make(control.second, (int) i,
-                                      _device, func, _ipc_node,
-                                      config.value()[control.first]));
+                                      _device, func, config.value()[control.first]));
     }
 
-    _ipc_interface = _device->ipcNode()->make_interface<IPC>(this);
 
     if (global_loglevel <= DEBUG) {
         // Print CIDs, originally by zv0n
@@ -186,34 +183,27 @@ namespace logid::features {
 }
 
 std::shared_ptr<Button> Button::make(
-        Info info, int index, Device* device, ConfigFunction conf_func,
-        const std::shared_ptr<ipcgull::node>& root, config::Button& config) {
-    auto ret = std::make_shared<ButtonWrapper>(info, index, device, std::move(conf_func),
-                                               root, config);
+        Info info, int index, Device* device, ConfigFunction conf_func, config::Button& config) {
+    auto ret = std::make_shared<ButtonWrapper>(info, index, device, std::move(conf_func), config);
     ret->_self = ret;
-    ret->_node->manage(ret);
 
     return ret;
 }
 
 Button::Button(Info info, int index,
                Device* device, ConfigFunction conf_func,
-               const std::shared_ptr<ipcgull::node>& root,
                config::Button& config) :
-        _node(root->make_child(std::to_string(index))),
         _device(device), _conf_func(std::move(conf_func)),
         _config(config),
         _info(info) {
     _makeConfig();
-
-    _ipc_interface = _node->make_interface<IPC>(this, _info);
 }
 
 void Button::_makeConfig() {
     auto& config = _config.get();
     if (config.action.has_value()) {
         try {
-            _action = Action::makeAction(_device, config.action.value(), _node);
+            _action = Action::makeAction(_device, config.action.value());
         } catch (std::exception& e) {
             logPrintf(WARN, "Error creating button action: %s", e.what());
         }
@@ -258,59 +248,4 @@ void Button::setProfile(config::Button& config) {
     _config = config;
     _action.reset();
     _makeConfig();
-}
-
-std::shared_ptr<ipcgull::node> Button::node() const {
-    return _node;
-}
-
-Button::IPC::IPC(Button* parent, const Info& info) :
-        ipcgull::interface(SERVICE_ROOT_NAME ".Button", {
-                {"SetAction", {this, &IPC::setAction, {"type"}}}
-        }, {
-                                   {"ControlID",      ipcgull::property<uint16_t>(
-                                           ipcgull::property_readable, info.controlID)},
-                                   {"TaskID",         ipcgull::property<uint16_t>(
-                                           ipcgull::property_readable, info.taskID)},
-                                   {"Remappable",     ipcgull::property<const bool>(
-                                           ipcgull::property_readable,
-                                           info.flags &
-                                           hidpp20::ReprogControls::TemporaryDivertable)},
-                                   {"GestureSupport", ipcgull::property<const bool>(
-                                           ipcgull::property_readable,
-                                           (info.additionalFlags & hidpp20::ReprogControls::RawXY)
-                                   )}
-                           }, {}), _button(*parent) {
-}
-
-void Button::IPC::setAction(const std::string& type) {
-    if (!(_button._info.flags & hidpp20::ReprogControls::TemporaryDivertable))
-        throw std::invalid_argument("Non-remappable");
-
-    if (type == GestureAction::interface_name &&
-        !(_button._info.additionalFlags & hidpp20::ReprogControls::RawXY))
-        throw std::invalid_argument("No gesture support");
-
-    {
-        std::unique_lock lock(_button._action_lock);
-        _button._action.reset();
-        _button._action = Action::makeAction(
-                _button._device, type,
-                _button._config.get().action, _button._node);
-    }
-    _button.configure();
-}
-
-RemapButton::IPC::IPC(RemapButton* parent) :
-        ipcgull::interface(SERVICE_ROOT_NAME ".Buttons", {
-                {"Enumerate", {this, &IPC::enumerate, {"buttons"}}}
-        }, {}, {}),
-        _parent(*parent) {
-}
-
-std::vector<std::shared_ptr<Button>> RemapButton::IPC::enumerate() const {
-    std::vector<std::shared_ptr<Button>> ret;
-    for (auto& x: _parent._buttons)
-        ret.push_back(x.second);
-    return ret;
 }
