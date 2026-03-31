@@ -41,47 +41,14 @@ namespace logid::features {
 
         void _fixGesture(const std::shared_ptr<actions::Gesture>& gesture) const;
 
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(ThumbWheel* parent);
-
-            [[nodiscard]] std::tuple<bool, bool> getConfig() const;
-
-            void setDivert(bool divert);
-
-            void setInvert(bool invert);
-
-            void setLeft(const std::string& type);
-
-            void setRight(const std::string& type);
-
-            void setProxy(const std::string& type);
-
-            void setTap(const std::string& type);
-
-            void setTouch(const std::string& type);
-
-        private:
-            config::ThumbWheel& _parentConfig();
-
-            ThumbWheel& _parent;
-        };
-
         std::shared_ptr<backend::hidpp20::ThumbWheel> _thumb_wheel;
         backend::hidpp20::ThumbWheel::ThumbwheelInfo _wheel_info;
 
-        std::shared_ptr<ipcgull::node> _node;
-
         std::shared_ptr<actions::Gesture> _left_gesture;
-        std::shared_ptr<ipcgull::node> _left_node;
         std::shared_ptr<actions::Gesture> _right_gesture;
-        std::shared_ptr<ipcgull::node> _right_node;
         std::shared_ptr<actions::Action> _proxy_action;
-        std::shared_ptr<ipcgull::node> _proxy_node;
         std::shared_ptr<actions::Action> _tap_action;
-        std::shared_ptr<ipcgull::node> _tap_node;
         std::shared_ptr<actions::Action> _touch_action;
-        std::shared_ptr<ipcgull::node> _touch_node;
 
         bool _last_proxy = false;
         bool _last_touch = false;
@@ -90,8 +57,6 @@ namespace logid::features {
         std::reference_wrapper<std::optional<config::ThumbWheel>> _config;
 
         EventHandlerLock<backend::hidpp::Device> _ev_handler;
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 }
 
