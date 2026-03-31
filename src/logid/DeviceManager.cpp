@@ -36,7 +36,6 @@ DeviceManager::DeviceManager(std::shared_ptr<Configuration> config,
         _root_node(ipcgull::node::make_root("")),
         _device_node(ipcgull::node::make_root("devices")),
         _receiver_node(ipcgull::node::make_root("receivers")) {
-    _ipc_devices = _root_node->make_interface<DevicesIPC>(this);
     _ipc_config = _root_node->make_interface<Configuration::IPC>(_config.get());
     _device_node->add_server(_server);
     _receiver_node->add_server(_server);
@@ -116,13 +115,11 @@ void DeviceManager::addDevice(std::string path) {
             auto device = Device::make(path, hidpp::DefaultDevice, self<DeviceManager>().lock());
             std::lock_guard<std::mutex> lock(_map_lock);
             _devices.emplace(path, device);
-            _ipc_devices->deviceAdded(device);
         } else {
             try {
                 auto device = Device::make(path, hidpp::CordedDevice, self<DeviceManager>().lock());
                 std::lock_guard<std::mutex> lock(_map_lock);
                 _devices.emplace(path, device);
-                _ipc_devices->deviceAdded(device);
             } catch (hidpp10::Error& e) {
                 if (e.code() != hidpp10::Error::UnknownDevice)
                     throw DeviceNotReady();
@@ -142,12 +139,11 @@ void DeviceManager::addDevice(std::string path) {
     }
 }
 
+//TODO Remove
 void DeviceManager::addExternalDevice(const std::shared_ptr<Device>& d) {
-    _ipc_devices->deviceAdded(d);
 }
 
 void DeviceManager::removeExternalDevice(const std::shared_ptr<Device>& d) {
-    _ipc_devices->deviceRemoved(d);
 }
 
 std::mutex& DeviceManager::mutex() const {
@@ -164,28 +160,10 @@ void DeviceManager::removeDevice(std::string path) {
     } else {
         auto device = _devices.find(path);
         if (device != _devices.end()) {
-            _ipc_devices->deviceRemoved(device->second);
             _devices.erase(device);
             logPrintf(INFO, "Device on %s disconnected", path.c_str());
         }
     }
-}
-
-DeviceManager::DevicesIPC::DevicesIPC(DeviceManager* manager) :
-        ipcgull::interface(
-                SERVICE_ROOT_NAME ".Devices",
-                {
-                        {"Enumerate", {manager, &DeviceManager::listDevices, {"devices"}}}
-                },
-                {},
-                {
-                        {"DeviceAdded",
-                                ipcgull::make_signal<std::shared_ptr<Device>>(
-                                        {"device"})},
-                        {"DeviceRemoved",
-                                ipcgull::make_signal<std::shared_ptr<Device>>(
-                                        {"device"})}
-                }) {
 }
 
 std::vector<std::shared_ptr<Device>> DeviceManager::listDevices() const {
@@ -207,16 +185,6 @@ std::vector<std::shared_ptr<Receiver>> DeviceManager::listReceivers() const {
     for (auto& x: _receivers)
         receivers.emplace_back(x.second);
     return receivers;
-}
-
-void DeviceManager::DevicesIPC::deviceAdded(
-        const std::shared_ptr<Device>& d) {
-    emit_signal("DeviceAdded", d);
-}
-
-void DeviceManager::DevicesIPC::deviceRemoved(
-        const std::shared_ptr<Device>& d) {
-    emit_signal("DeviceRemoved", d);
 }
 
 int DeviceManager::newDeviceNickname() {

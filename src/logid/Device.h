@@ -56,7 +56,7 @@ namespace logid {
      * Currently, the logid::Device class has a hardcoded requirement
      * for an HID++ 2.0 device.
      */
-    class Device : public ipcgull::object {
+    class Device {
     public:
         std::string name();
 
@@ -100,8 +100,6 @@ namespace logid {
         void reset();
 
         [[nodiscard]] std::shared_ptr<InputDevice> virtualInput() const;
-
-        [[nodiscard]] std::shared_ptr<ipcgull::node> ipcNode() const;
 
         template<typename T>
         std::shared_ptr<T> getFeature(const std::string& name) {
@@ -154,7 +152,7 @@ namespace logid {
 
         config::Device& _config;
         mutable std::shared_mutex _profile_mutex;
-        ipcgull::property<std::string> _profile_name;
+        std::string _profile_name;
         std::map<std::string, config::Profile>::iterator _profile;
 
         const std::weak_ptr<DeviceManager> _manager;
@@ -164,23 +162,11 @@ namespace logid {
         std::unique_ptr<std::function<void()>> _reset_mechanism;
 
         const DeviceNickname _nickname;
-        std::shared_ptr<ipcgull::node> _ipc_node;
 
-        class IPC : public ipcgull::interface {
-        private:
-            Device& _device;
-        public:
-            explicit IPC(Device* device);
-
-            void notifyStatus() const;
-        };
-
-        ipcgull::property<bool> _awake;
+        bool _awake;
         std::mutex _state_lock;
 
         std::weak_ptr<Device> _self;
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 }
 

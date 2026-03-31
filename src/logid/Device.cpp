@@ -64,8 +64,6 @@ std::shared_ptr<Device> Device::make(
                                                index,
                                                std::move(manager));
     ret->_self = ret;
-    ret->_ipc_node->manage(ret);
-    ret->_ipc_interface = ret->_ipc_node->make_interface<IPC>(ret.get());
     return ret;
 }
 
@@ -77,8 +75,6 @@ std::shared_ptr<Device> Device::make(
                                                index,
                                                std::move(manager));
     ret->_self = ret;
-    ret->_ipc_node->manage(ret);
-    ret->_ipc_interface = ret->_ipc_node->make_interface<IPC>(ret.get());
     return ret;
 }
 
@@ -87,8 +83,6 @@ std::shared_ptr<Device> Device::make(
         std::shared_ptr<DeviceManager> manager) {
     auto ret = std::make_shared<DeviceWrapper>(receiver, index, std::move(manager));
     ret->_self = ret;
-    ret->_ipc_node->manage(ret);
-    ret->_ipc_interface = ret->_ipc_node->make_interface<IPC>(ret.get());
     return ret;
 }
 
@@ -99,11 +93,8 @@ Device::Device(std::string path, backend::hidpp::DeviceIndex index,
                                                defaults::io_timeout))),
         _path(std::move(path)), _index(index),
         _config(_getConfig(manager, _hidpp20->name())),
-        _profile_name(ipcgull::property_readable, ""),
         _manager(manager),
-        _nickname(manager),
-        _ipc_node(manager->devicesNode()->make_child(_nickname)),
-        _awake(ipcgull::property_readable, true) {
+        _nickname(manager) {
     _init();
 }
 
@@ -114,11 +105,8 @@ Device::Device(std::shared_ptr<backend::raw::RawDevice> raw_device,
                 manager->config()->io_timeout.value_or(defaults::io_timeout))),
         _path(raw_device->rawPath()), _index(index),
         _config(_getConfig(manager, _hidpp20->name())),
-        _profile_name(ipcgull::property_readable, ""),
         _manager(manager),
-        _nickname(manager),
-        _ipc_node(manager->devicesNode()->make_child(_nickname)),
-        _awake(ipcgull::property_readable, true) {
+        _nickname(manager) {
     _init();
 }
 
@@ -129,11 +117,8 @@ Device::Device(Receiver* receiver, hidpp::DeviceIndex index,
                 manager->config()->io_timeout.value_or(defaults::io_timeout))),
         _path(receiver->path()), _index(index),
         _config(_getConfig(manager, _hidpp20->name())),
-        _profile_name(ipcgull::property_readable, ""),
         _manager(manager),
-        _nickname(manager),
-        _ipc_node(manager->devicesNode()->make_child(_nickname)),
-        _awake(ipcgull::property_readable, true) {
+        _nickname(manager) {
     _init();
 }
 
@@ -146,7 +131,6 @@ void Device::_init() {
         _profile = _config.profiles.find(_config.default_profile);
         if (_profile == _config.profiles.end())
             _profile = _config.profiles.insert({_config.default_profile, {}}).first;
-        _profile_name = _config.default_profile;
     }
 
     _addFeature<features::DPI>("dpi");
@@ -178,7 +162,6 @@ void Device::sleep() {
     if (_awake) {
         logPrintf(INFO, "%s:%d fell asleep.", _path.c_str(), _index);
         _awake = false;
-        _ipc_interface->notifyStatus();
     }
 }
 
@@ -189,7 +172,6 @@ void Device::wakeup() {
 
     if (!_awake) {
         _awake = true;
-        _ipc_interface->notifyStatus();
     }
 
     logPrintf(INFO, "%s:%d woke up.", _path.c_str(), _index);
@@ -220,10 +202,6 @@ std::shared_ptr<InputDevice> Device::virtualInput() const {
                   " the program will now exit.");
         std::terminate();
     }
-}
-
-std::shared_ptr<ipcgull::node> Device::ipcNode() const {
-    return _ipc_node;
 }
 
 std::vector<std::string> Device::getProfiles() const {
@@ -309,32 +287,6 @@ void Device::_makeResetMechanism() {
     } catch (hidpp20::UnsupportedFeature& e) {
         // Reset unsupported, ignore.
     }
-}
-
-Device::IPC::IPC(Device* device) :
-        ipcgull::interface(
-                SERVICE_ROOT_NAME ".Device",
-                {
-                        {"GetProfiles", {device, &Device::getProfiles, {"profiles"}}},
-                        {"SetProfile", {device, &Device::setProfile, {"profile"}}},
-                        {"RemoveProfile", {device, &Device::removeProfile, {"profile"}}},
-                        {"ClearProfile", {device, &Device::clearProfile, {"profile"}}}
-                },
-                {
-                        {"Name",           ipcgull::property<std::string>(
-                                ipcgull::property_readable, device->name())},
-                        {"ProductID",      ipcgull::property<uint16_t>(
-                                ipcgull::property_readable, device->pid())},
-                        {"Active",         device->_awake},
-                        {"DefaultProfile", device->_config.default_profile},
-                        {"ActiveProfile", device->_profile_name}
-                }, {
-                        {"StatusChanged", ipcgull::signal::make_signal<bool>({"active"})}
-                }), _device(*device) {
-}
-
-void Device::IPC::notifyStatus() const {
-    emit_signal("StatusChanged", (bool) (_device._awake));
 }
 
 config::Device& Device::_getConfig(
