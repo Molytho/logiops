@@ -41,13 +41,12 @@ namespace logid {
         const std::weak_ptr<DeviceManager> _manager;
     };
 
-    class Receiver : public backend::hidpp10::ReceiverMonitor,
-                     public ipcgull::object {
+    class Receiver : public backend::hidpp10::ReceiverMonitor {
     public:
         typedef std::map<backend::hidpp::DeviceIndex, std::shared_ptr<Device>>
                 DeviceList;
 
-        ~Receiver() noexcept override;
+        ~Receiver() noexcept;
 
         static std::shared_ptr<Receiver> make(
                 const std::string& path,
@@ -86,14 +85,6 @@ namespace logid {
         std::weak_ptr<DeviceManager> _manager;
 
         const ReceiverNickname _nickname;
-        std::shared_ptr<ipcgull::node> _ipc_node;
-
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(Receiver* receiver);
-        };
-
-        std::shared_ptr<ipcgull::interface> _ipc_interface;
     };
 }
 

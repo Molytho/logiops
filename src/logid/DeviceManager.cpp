@@ -37,7 +37,6 @@ DeviceManager::DeviceManager(std::shared_ptr<Configuration> config,
         _device_node(ipcgull::node::make_root("devices")),
         _receiver_node(ipcgull::node::make_root("receivers")) {
     _ipc_devices = _root_node->make_interface<DevicesIPC>(this);
-    _ipc_receivers = _root_node->make_interface<ReceiversIPC>(this);
     _ipc_config = _root_node->make_interface<Configuration::IPC>(_config.get());
     _device_node->add_server(_server);
     _receiver_node->add_server(_server);
@@ -110,7 +109,6 @@ void DeviceManager::addDevice(std::string path) {
         auto receiver = Receiver::make(path, self<DeviceManager>().lock());
         std::lock_guard<std::mutex> lock(_map_lock);
         _receivers.emplace(path, receiver);
-        _ipc_receivers->receiverAdded(receiver);
     } else {
         /* TODO: Can non-receivers only contain 1 device?
         * If the device exists, it is guaranteed to be an HID++ 2.0 device */
@@ -161,7 +159,6 @@ void DeviceManager::removeDevice(std::string path) {
     auto receiver = _receivers.find(path);
 
     if (receiver != _receivers.end()) {
-        _ipc_receivers->receiverRemoved(receiver->second);
         _receivers.erase(receiver);
         logPrintf(INFO, "Receiver on %s disconnected", path.c_str());
     } else {
@@ -220,34 +217,6 @@ void DeviceManager::DevicesIPC::deviceAdded(
 void DeviceManager::DevicesIPC::deviceRemoved(
         const std::shared_ptr<Device>& d) {
     emit_signal("DeviceRemoved", d);
-}
-
-DeviceManager::ReceiversIPC::ReceiversIPC(DeviceManager* manager) :
-        ipcgull::interface(
-                SERVICE_ROOT_NAME ".Receivers",
-                {
-                        {"Enumerate", {manager, &DeviceManager::listReceivers,
-                                       {"receivers"}}}
-                },
-                {},
-                {
-                        {"ReceiverAdded",
-                                ipcgull::make_signal<std::shared_ptr<Receiver>>(
-                                        {"receiver"})},
-                        {"ReceiverRemoved",
-                                ipcgull::make_signal<std::shared_ptr<Receiver>>(
-                                        {"receiver"})}
-                }) {
-}
-
-void DeviceManager::ReceiversIPC::receiverAdded(
-        const std::shared_ptr<Receiver>& r) {
-    emit_signal("ReceiverAdded", r);
-}
-
-void DeviceManager::ReceiversIPC::receiverRemoved(
-        const std::shared_ptr<Receiver>& r) {
-    emit_signal("ReceiverRemoved", r);
 }
 
 int DeviceManager::newDeviceNickname() {

@@ -68,15 +68,6 @@ namespace logid {
         [[nodiscard]]
         std::vector<std::shared_ptr<Device>> listDevices() const;
 
-        class ReceiversIPC : public ipcgull::interface {
-        public:
-            explicit ReceiversIPC(DeviceManager* manager);
-
-            void receiverAdded(const std::shared_ptr<Receiver>& r);
-
-            void receiverRemoved(const std::shared_ptr<Receiver>& r);
-        };
-
         [[nodiscard]]
         std::vector<std::shared_ptr<Receiver>> listReceivers() const;
 
@@ -91,7 +82,6 @@ namespace logid {
 
         std::shared_ptr<Configuration::IPC> _ipc_config;
         std::shared_ptr<DevicesIPC> _ipc_devices;
-        std::shared_ptr<ReceiversIPC> _ipc_receivers;
 
         std::map<std::string, std::shared_ptr<Device>> _devices;
         std::map<std::string, std::shared_ptr<Receiver>> _receivers;

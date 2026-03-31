@@ -45,7 +45,6 @@ std::shared_ptr<Receiver> Receiver::make(
         const std::string& path,
         const std::shared_ptr<DeviceManager>& manager) {
     auto ret = ReceiverMonitor::make<Receiver>(path, manager);
-    ret->_ipc_node->manage(ret);
     return ret;
 }
 
@@ -55,9 +54,7 @@ Receiver::Receiver(const std::string& path,
         hidpp10::ReceiverMonitor(path, manager,
                                  manager->config()->io_timeout.value_or(
                                          defaults::io_timeout)),
-        _path(path), _manager(manager), _nickname(manager),
-        _ipc_node(manager->receiversNode()->make_child(_nickname)),
-        _ipc_interface(_ipc_node->make_interface<IPC>(this)) {
+        _path(path), _manager(manager), _nickname(manager) {
 }
 
 const Receiver::DeviceList& Receiver::devices() const {
@@ -172,7 +169,6 @@ void Receiver::pairReady(const hidpp10::DeviceDiscoveryEvent& event,
             type = "trackball";
             break;
     }
-    _ipc_interface->emit_signal("PairReady", event.name, event.pid, type, passkey);
 }
 
 const std::string& Receiver::path() const {
@@ -210,25 +206,4 @@ void Receiver::stopPair() {
 
 void Receiver::unpair(int device) {
     receiver()->disconnect(static_cast<hidpp::DeviceIndex>(device));
-}
-
-Receiver::IPC::IPC(Receiver* receiver) :
-        ipcgull::interface(
-                SERVICE_ROOT_NAME ".Receiver",
-                {
-                        {"GetPaired",     {receiver, &Receiver::pairedDevices, {"devices"}}},
-                        {"StartPair",     {receiver, &Receiver::startPair,     {"timeout"}}},
-                        {"StopPair",      {receiver, &Receiver::stopPair}},
-                        {"Unpair",        {receiver, &Receiver::unpair,        {"device"}}}
-                },
-                {
-                        {"Bolt", ipcgull::property<bool>(ipcgull::property_readable,
-                                                         receiver->receiver()->bolt())}
-                }, {
-                        {"PairReady",
-                         ipcgull::signal::make_signal<std::string, uint16_t, std::string,
-                            std::string>(
-                                 {"name", "pid", "type", "passkey"})
-                        }
-                }) {
 }
