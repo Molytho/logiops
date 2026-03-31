@@ -307,13 +307,13 @@ namespace logid::config {
     };
 
     struct Device : public group {
-        ipcgull::property<std::string> default_profile;
+        std::string default_profile;
         map<std::string, Profile, string_literal_of<keys::name>> profiles;
 
         Device() : group({"default_profile", "profiles"},
                          &Device::default_profile,
                          &Device::profiles),
-                   default_profile(ipcgull::property_full_permissions, "") {
+                   default_profile() {
         }
     };
 

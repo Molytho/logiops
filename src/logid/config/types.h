@@ -73,10 +73,6 @@ namespace logid::config {
         }
     };
 
-    template<typename T>
-    struct config_io<ipcgull::property<T>> : public config_io<T> {
-    };
-
     template<typename T, libconfig::Setting::Type TypeEnum>
     struct primitive_io {
         static T get(const libconfig::Setting& parent,

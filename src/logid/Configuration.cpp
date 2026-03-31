@@ -68,9 +68,3 @@ void Configuration::save() {
         throw;
     }
 }
-
-Configuration::IPC::IPC(Configuration* config) :
-        ipcgull::interface(SERVICE_ROOT_NAME ".Config", {
-                {"Save", {config, &Configuration::save}}
-        }, {}, {}) {
-}

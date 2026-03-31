@@ -43,11 +43,6 @@ namespace logid {
         //void reload();
         void save();
 
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(Configuration* config);
-        };
-
     private:
         std::string _config_file;
         libconfig::Config _config;
