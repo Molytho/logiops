@@ -29,14 +29,7 @@ const char* KeypressAction::interface_name = "Keypress";
 KeypressAction::KeypressAction(
         Device* device, config::KeypressAction& config,
         [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
-        Action(device, interface_name, {
-                {
-                        {"GetKeys", {this, &KeypressAction::getKeys, {"keys"}}},
-                        {"SetKeys", {this, &KeypressAction::setKeys, {"keys"}}}
-                },
-                {},
-                {}
-        }), _config(config) {
+        Action(device, interface_name), _config(config) {
     _setConfig();
 }
 

@@ -46,11 +46,8 @@ namespace logid::actions {
     };
 
     template<typename T>
-    std::shared_ptr<Action> _makeAction(
-            Device* device, T& action,
-            const std::shared_ptr<ipcgull::node>& parent) {
-        return parent->make_interface<typename action_type<T>::type>(
-                device, std::forward<T&>(action), parent);
+    std::shared_ptr<Action> _makeAction(Device *device, T &action, const std::shared_ptr<ipcgull::node> &parent) {
+        return std::make_shared<typename action_type<T>::type>(device, std::forward<T&>(action), parent);
     }
 
     template<typename T>
@@ -137,7 +134,6 @@ std::shared_ptr<Action> Action::makeAction(
     return ret;
 }
 
-Action::Action(Device* device, const std::string& name, tables t) :
-        ipcgull::interface(SERVICE_ROOT_NAME ".Action." + name, std::move(t)),
+Action::Action(Device* device, [[maybe_unused]] const std::string& name) : // TODO: Remove name
         _device(device), _pressed(false) {
 }

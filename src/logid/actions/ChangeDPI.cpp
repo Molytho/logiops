@@ -28,14 +28,7 @@ const char* ChangeDPI::interface_name = "ChangeDPI";
 ChangeDPI::ChangeDPI(
         Device* device, config::ChangeDPI& config,
         [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
-        Action(device, interface_name, {
-                {
-                        {"GetConfig", {this, &ChangeDPI::getConfig, {"change", "sensor"}}},
-                        {"SetChange", {this, &ChangeDPI::setChange, {"change"}}},
-                        {"SetSensor", {this, &ChangeDPI::setSensor, {"sensor", "reset"}}},
-                },
-                {},
-                {}}), _config(config) {
+        Action(device, interface_name), _config(config) {
     _dpi = _device->getFeature<features::DPI>("dpi");
     if (!_dpi)
         logPrintf(WARN, "%s:%d: DPI feature not found, cannot use ChangeDPI action.",

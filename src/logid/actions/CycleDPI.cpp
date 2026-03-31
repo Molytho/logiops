@@ -27,14 +27,7 @@ const char* CycleDPI::interface_name = "CycleDPI";
 
 CycleDPI::CycleDPI(Device* device, config::CycleDPI& config,
                    [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
-        Action(device, interface_name, {
-                {
-                        {"GetDPIs", {this, &CycleDPI::getDPIs, {"dpis"}}},
-                        {"SetDPIs", {this, &CycleDPI::setDPIs, {"dpis"}}}
-                },
-                {},
-                {}
-        }),
+        Action(device, interface_name),
         _config(config) {
     _dpi = _device->getFeature<features::DPI>("dpi");
     if (!_dpi)

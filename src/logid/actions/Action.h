@@ -45,25 +45,25 @@ namespace logid::actions {
         std::string _action;
     };
 
-    class Action : public ipcgull::interface {
+    class Action {
     public:
         static std::shared_ptr<Action> makeAction(
                 Device* device, const std::string& name,
                 std::optional<config::BasicAction>& config,
-                const std::shared_ptr<ipcgull::node>& parent);
+                const std::shared_ptr<ipcgull::node>& parent = nullptr);
 
         static std::shared_ptr<Action> makeAction(
                 Device* device, const std::string& name,
                 std::optional<config::Action>& config,
-                const std::shared_ptr<ipcgull::node>& parent);
+                const std::shared_ptr<ipcgull::node>& parent = nullptr);
 
         static std::shared_ptr<Action> makeAction(
                 Device* device, config::BasicAction& action,
-                const std::shared_ptr<ipcgull::node>& parent);
+                const std::shared_ptr<ipcgull::node>& parent = nullptr);
 
         static std::shared_ptr<Action> makeAction(
                 Device* device, config::Action& action,
-                const std::shared_ptr<ipcgull::node>& parent);
+                const std::shared_ptr<ipcgull::node>& parent = nullptr);
 
         virtual void press() = 0;
 
@@ -80,7 +80,7 @@ namespace logid::actions {
         virtual ~Action() = default;
 
     protected:
-        Action(Device* device, const std::string& name, tables t = {});
+        Action(Device* device, const std::string& name);
 
         Device* _device;
         std::atomic<bool> _pressed;

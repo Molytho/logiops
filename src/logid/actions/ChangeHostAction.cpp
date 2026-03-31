@@ -30,14 +30,7 @@ const char* ChangeHostAction::interface_name = "ChangeHost";
 ChangeHostAction::ChangeHostAction(
         Device* device, config::ChangeHost& config,
         [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent)
-        : Action(device, interface_name, {
-        {
-                {"GetHost", {this, &ChangeHostAction::getHost, {"host"}}},
-                {"SetHost", {this, &ChangeHostAction::setHost, {"host"}}}
-        },
-        {},
-        {}
-}), _config(config) {
+        : Action(device, interface_name), _config(config) {
     if (_config.host.has_value()) {
         if (std::holds_alternative<std::string>(_config.host.value())) {
             auto& host = std::get<std::string>(_config.host.value());

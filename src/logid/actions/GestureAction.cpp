@@ -74,14 +74,7 @@ GestureAction::Direction GestureAction::toDirection(int32_t x, int32_t y) {
 
 GestureAction::GestureAction(Device* dev, config::GestureAction& config,
                              const std::shared_ptr<ipcgull::node>& parent) :
-        Action(dev, interface_name,
-               {
-                       {
-                               {"SetGesture", {this, &GestureAction::setGesture, {"direction", "type"}}}
-                       },
-                       {},
-                       {}
-               }),
+        Action(dev, interface_name),
         _node(parent->make_child("gestures")), _config(config) {
     if (_config.gestures.has_value()) {
         auto& gestures = _config.gestures.value();
