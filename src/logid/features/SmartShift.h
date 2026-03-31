@@ -53,24 +53,6 @@ namespace logid::features {
 
         backend::hidpp20::SmartShift::Defaults _defaults{};
         bool _torque_support = false;
-
-        class IPC : public ipcgull::interface {
-        public:
-            explicit IPC(SmartShift* parent);
-
-            [[nodiscard]] std::tuple<uint8_t, uint8_t, uint8_t> getConfig() const;
-
-            void setActive(bool active, bool clear);
-
-            void setThreshold(uint8_t threshold, bool clear);
-
-            void setTorque(uint8_t torque, bool clear);
-
-        private:
-            SmartShift& _parent;
-        };
-
-        std::shared_ptr<IPC> _ipc_interface;
     };
 }
 
