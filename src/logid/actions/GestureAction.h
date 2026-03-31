@@ -41,8 +41,7 @@ namespace logid::actions {
 
         static Direction toDirection(int32_t x, int32_t y);
 
-        GestureAction(Device* dev, config::GestureAction& config,
-                      const std::shared_ptr<ipcgull::node>& parent);
+        GestureAction(Device* dev, config::GestureAction& config);
 
         void press() final;
 
@@ -57,7 +56,6 @@ namespace logid::actions {
 
     protected:
         int32_t _x{}, _y{};
-        std::shared_ptr<ipcgull::node> _node;
         std::map<Direction, std::shared_ptr<Gesture>> _gestures;
         config::GestureAction& _config;
     };

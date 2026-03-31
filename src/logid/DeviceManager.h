@@ -35,11 +35,6 @@ namespace logid {
 
         [[nodiscard]] std::shared_ptr<InputDevice> virtualInput() const;
 
-        [[nodiscard]] std::shared_ptr<const ipcgull::node> devicesNode() const;
-
-        [[nodiscard]] std::shared_ptr<const ipcgull::node>
-        receiversNode() const;
-
         void addExternalDevice(const std::shared_ptr<Device>& d);
 
         void removeExternalDevice(const std::shared_ptr<Device>& d);

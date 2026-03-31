@@ -26,8 +26,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ChangeDPI(Device* device, config::ChangeDPI& setting,
-                  const std::shared_ptr<ipcgull::node>& parent);
+        ChangeDPI(Device* device, config::ChangeDPI& setting);
 
         void press() final;
 

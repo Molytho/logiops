@@ -25,8 +25,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        IntervalGesture(Device* device, config::IntervalGesture& config,
-                        const std::shared_ptr<ipcgull::node>& parent);
+        IntervalGesture(Device* device, config::IntervalGesture& config);
 
         void press(bool init_threshold) final;
 

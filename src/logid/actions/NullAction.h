@@ -25,12 +25,10 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        NullAction(Device* device,
-                   const std::shared_ptr<ipcgull::node>& parent);
+        NullAction(Device* device);
 
-        NullAction(Device* device, [[maybe_unused]] config::NoAction& config,
-                   const std::shared_ptr<ipcgull::node>& parent) :
-                NullAction(device, parent) {}
+        NullAction(Device* device, [[maybe_unused]] config::NoAction& config) :
+                NullAction(device) {}
 
         void press() final;
 

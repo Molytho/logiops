@@ -25,8 +25,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        AxisGesture(Device* device, config::AxisGesture& config,
-                    const std::shared_ptr<ipcgull::node>& parent);
+        AxisGesture(Device* device, config::AxisGesture& config);
 
         void press(bool init_threshold) final;
 

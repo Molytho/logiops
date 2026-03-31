@@ -23,9 +23,8 @@ using namespace logid::actions;
 const char* NullGesture::interface_name = "None";
 
 NullGesture::NullGesture(Device* device,
-                         config::NoGesture& config,
-                         const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name), _config(config) {
+                         config::NoGesture& config) :
+        Gesture(device, nullptr, interface_name), _config(config) {
 }
 
 void NullGesture::press(bool init_threshold) {

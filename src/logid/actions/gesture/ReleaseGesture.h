@@ -25,8 +25,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ReleaseGesture(Device* device, config::ReleaseGesture& config,
-                       const std::shared_ptr<ipcgull::node>& parent);
+        ReleaseGesture(Device* device, config::ReleaseGesture& config);
 
         void press(bool init_threshold) final;
 

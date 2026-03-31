@@ -26,13 +26,11 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ToggleSmartShift(Device* dev,
-                         const std::shared_ptr<ipcgull::node>& parent);
+        ToggleSmartShift(Device* dev);
 
         ToggleSmartShift(Device* device,
-                         [[maybe_unused]] config::ToggleSmartShift& action,
-                         const std::shared_ptr<ipcgull::node>& parent) :
-                ToggleSmartShift(device, parent) {}
+                         [[maybe_unused]] config::ToggleSmartShift& action) :
+                ToggleSmartShift(device) {}
 
         void press() final;
 

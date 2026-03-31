@@ -72,10 +72,8 @@ GestureAction::Direction GestureAction::toDirection(int32_t x, int32_t y) {
         return x <= -y ? Up : Right;
 }
 
-GestureAction::GestureAction(Device* dev, config::GestureAction& config,
-                             const std::shared_ptr<ipcgull::node>& parent) :
-        Action(dev, interface_name),
-        _node(parent->make_child("gestures")), _config(config) {
+GestureAction::GestureAction(Device* dev, config::GestureAction& config) :
+        Action(dev, interface_name), _config(config) {
     if (_config.gestures.has_value()) {
         auto& gestures = _config.gestures.value();
         for (auto&& x: gestures) {
@@ -83,8 +81,7 @@ GestureAction::GestureAction(Device* dev, config::GestureAction& config,
                 auto direction = toDirection(x.first);
                 _gestures.emplace(
                         direction,Gesture::makeGesture(
-                                dev, x.second,
-                                _node->make_child(fromDirection(direction))));
+                                dev, x.second));
                 if (direction == None) {
                     auto& gesture = x.second;
                     std::visit([](auto&& x) {
@@ -237,12 +234,10 @@ void GestureAction::setGesture(const std::string& direction, const std::string& 
     _gestures[d].reset();
     try {
         _gestures[d] = Gesture::makeGesture(
-                _device, type, gesture,
-                _node->make_child(dir_name));
+                _device, type, gesture);
     } catch (InvalidGesture& e) {
         _gestures[d] = Gesture::makeGesture(
-                _device, gesture,
-                _node->make_child(dir_name));
+                _device, gesture);
         throw std::invalid_argument("Invalid gesture type");
     }
 

@@ -23,8 +23,7 @@ using namespace logid::actions;
 const char* NullAction::interface_name = "None";
 
 NullAction::NullAction(
-        Device* device,
-        [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+        Device* device) :
         Action(device, interface_name) {
 }
 

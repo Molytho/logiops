@@ -26,12 +26,11 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ToggleHiresScroll(Device* dev, const std::shared_ptr<ipcgull::node>& parent);
+        ToggleHiresScroll(Device* dev);
 
         ToggleHiresScroll(Device* device,
-                          [[maybe_unused]] config::ToggleHiresScroll& action,
-                          const std::shared_ptr<ipcgull::node>& parent) :
-                ToggleHiresScroll(device, parent) {}
+                          [[maybe_unused]] config::ToggleHiresScroll& action) :
+                ToggleHiresScroll(device) {}
 
         void press() final;
 

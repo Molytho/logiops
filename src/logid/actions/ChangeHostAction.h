@@ -26,8 +26,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ChangeHostAction(Device* device, config::ChangeHost& config,
-                         const std::shared_ptr<ipcgull::node>& parent);
+        ChangeHostAction(Device* device, config::ChangeHost& config);
 
         void press() final;
 

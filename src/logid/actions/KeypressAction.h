@@ -27,8 +27,7 @@ namespace logid::actions {
         static const char* interface_name;
 
         KeypressAction(Device* dev,
-                       config::KeypressAction& config,
-                       const std::shared_ptr<ipcgull::node>& parent);
+                       config::KeypressAction& config);
 
         void press() final;
 

@@ -25,8 +25,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ChangeProfile(Device* device, config::ChangeProfile& setting,
-                      const std::shared_ptr<ipcgull::node>& parent);
+        ChangeProfile(Device* device, config::ChangeProfile& setting);
 
         void press() final;
 

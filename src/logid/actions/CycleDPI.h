@@ -26,8 +26,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        CycleDPI(Device* device, config::CycleDPI& setting,
-                 const std::shared_ptr<ipcgull::node>& parent);
+        CycleDPI(Device* device, config::CycleDPI& setting);
 
         void press() final;
 

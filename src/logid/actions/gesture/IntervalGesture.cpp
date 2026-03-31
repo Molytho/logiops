@@ -24,9 +24,8 @@ using namespace logid::actions;
 const char* IntervalGesture::interface_name = "OnInterval";
 
 IntervalGesture::IntervalGesture(
-        Device* device, config::IntervalGesture& config,
-        const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name),
+        Device* device, config::IntervalGesture& config) :
+        Gesture(device, nullptr, interface_name),
         _axis(0), _interval_pass_count(0), _config(config) {
     if (config.action) {
         try {

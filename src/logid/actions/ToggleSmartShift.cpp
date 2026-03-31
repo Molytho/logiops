@@ -28,8 +28,7 @@ using namespace logid::backend;
 const char* ToggleSmartShift::interface_name = "ToggleSmartShift";
 
 ToggleSmartShift::ToggleSmartShift(
-        Device* dev,
-        [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+        Device* dev) :
         Action(dev, interface_name) {
     _smartshift = _device->getFeature<features::SmartShift>("smartshift");
     if (!_smartshift)

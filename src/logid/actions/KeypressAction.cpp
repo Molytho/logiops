@@ -27,8 +27,7 @@ using namespace logid::backend;
 const char* KeypressAction::interface_name = "Keypress";
 
 KeypressAction::KeypressAction(
-        Device* device, config::KeypressAction& config,
-        [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+        Device* device, config::KeypressAction& config) :
         Action(device, interface_name), _config(config) {
     _setConfig();
 }

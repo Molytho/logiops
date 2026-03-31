@@ -44,15 +44,14 @@ namespace {
     struct gesture_type<T &> : gesture_type<T> { };
 
     template<typename T>
-    std::shared_ptr<Gesture> _makeGesture(Device *device, T &gesture,
-        const std::shared_ptr<ipcgull::node> &parent) {
-        return std::make_shared<typename gesture_type<T>::type>(device, std::forward<T &>(gesture), parent);
+    std::shared_ptr<Gesture> _makeGesture(Device *device, T &gesture) {
+        return std::make_shared<typename gesture_type<T>::type>(device, std::forward<T &>(gesture));
     }
 } // namespace
 
 std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, config::Gesture &gesture,
     const std::shared_ptr<ipcgull::node> &parent) {
-    return std::visit([&device, &parent](auto &&x) { return _makeGesture(device, x, parent); }, gesture);
+    return std::visit([&device](auto &&x) { return _makeGesture(device, x); }, gesture);
 }
 
 std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, const std::string &type,
@@ -71,5 +70,5 @@ std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, const std::string 
         throw InvalidGesture();
     }
 
-    return makeGesture(device, config, parent);
+    return makeGesture(device, config);
 }

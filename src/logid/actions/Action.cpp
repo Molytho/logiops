@@ -46,15 +46,14 @@ namespace logid::actions {
     };
 
     template<typename T>
-    std::shared_ptr<Action> _makeAction(Device *device, T &action, const std::shared_ptr<ipcgull::node> &parent) {
-        return std::make_shared<typename action_type<T>::type>(device, std::forward<T&>(action), parent);
+    std::shared_ptr<Action> _makeAction(Device *device, T &action) {
+        return std::make_shared<typename action_type<T>::type>(device, std::forward<T&>(action));
     }
 
     template<typename T>
     std::shared_ptr<Action> _makeAction(
             Device* device, const std::string& name,
-            std::optional<T>& config,
-            const std::shared_ptr<ipcgull::node>& parent) {
+            std::optional<T>& config) {
         if (name == ChangeDPI::interface_name) {
             config = config::ChangeDPI();
         } else if (name == CycleDPI::interface_name) {
@@ -78,7 +77,7 @@ namespace logid::actions {
             throw InvalidAction(name);
         }
 
-        return Action::makeAction(device, config.value(), parent);
+        return Action::makeAction(device, config.value());
     }
 }
 
@@ -86,7 +85,7 @@ std::shared_ptr<Action> Action::makeAction(
         Device* device, const std::string& name,
         std::optional<config::BasicAction>& config,
         const std::shared_ptr<ipcgull::node>& parent) {
-    auto ret = _makeAction(device, name, config, parent);
+    auto ret = _makeAction(device, name, config);
     if (ret)
         ret->_self = ret;
     return ret;
@@ -97,14 +96,14 @@ std::shared_ptr<Action> Action::makeAction(
         std::optional<config::Action>& config,
         const std::shared_ptr<ipcgull::node>& parent) {
     try {
-        auto ret = _makeAction(device, name, config, parent);
+        auto ret = _makeAction(device, name, config);
         if (ret)
             ret->_self = ret;
         return ret;
     } catch (actions::InvalidAction& e) {
         if (name == GestureAction::interface_name) {
             config = config::GestureAction();
-            return makeAction(device, config.value(), parent);
+            return makeAction(device, config.value());
         }
         throw;
     }
@@ -114,8 +113,8 @@ std::shared_ptr<Action> Action::makeAction(
         Device* device, config::BasicAction& action,
         const std::shared_ptr<ipcgull::node>& parent) {
     std::shared_ptr<Action> ret;
-    std::visit([&device, &ret, &parent](auto&& x) {
-        ret = _makeAction(device, x, parent);
+    std::visit([&device, &ret](auto&& x) {
+        ret = _makeAction(device, x);
     }, action);
     if (ret)
         ret->_self = ret;
@@ -127,7 +126,7 @@ std::shared_ptr<Action> Action::makeAction(
         const std::shared_ptr<ipcgull::node>& parent) {
     std::shared_ptr<Action> ret;
     std::visit([&device, &ret, &parent](auto&& x) {
-        ret = _makeAction(device, x, parent);
+        ret = _makeAction(device, x);
     }, action);
     if (ret)
         ret->_self = ret;

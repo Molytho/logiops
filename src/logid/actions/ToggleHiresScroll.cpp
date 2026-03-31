@@ -27,8 +27,7 @@ using namespace logid::backend;
 const char* ToggleHiresScroll::interface_name = "ToggleHiresScroll";
 
 ToggleHiresScroll::ToggleHiresScroll(
-        Device* dev,
-        [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+        Device* dev) :
         Action(dev, interface_name) {
     _hires_scroll = _device->getFeature<features::HiresScroll>("hiresscroll");
     if (!_hires_scroll)

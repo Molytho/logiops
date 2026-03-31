@@ -26,8 +26,7 @@ namespace logid::actions {
         static const char* interface_name;
 
         NullGesture(Device* device,
-                    config::NoGesture& config,
-                    const std::shared_ptr<ipcgull::node>& parent);
+                    config::NoGesture& config);
 
         void press(bool init_threshold) final;
 

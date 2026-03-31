@@ -24,8 +24,7 @@ using namespace logid::actions;
 
 const char* ChangeProfile::interface_name = "ChangeProfile";
 
-ChangeProfile::ChangeProfile(Device* device, config::ChangeProfile& config,
-                             [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+ChangeProfile::ChangeProfile(Device* device, config::ChangeProfile& config) :
         Action(device, interface_name), _config(config) {
 }
 

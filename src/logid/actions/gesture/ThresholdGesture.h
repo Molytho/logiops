@@ -25,8 +25,7 @@ namespace logid::actions {
     public:
         static const char* interface_name;
 
-        ThresholdGesture(Device* device, config::ThresholdGesture& config,
-                         const std::shared_ptr<ipcgull::node>& parent);
+        ThresholdGesture(Device* device, config::ThresholdGesture& config);
 
         void press(bool init_threshold) final;
 

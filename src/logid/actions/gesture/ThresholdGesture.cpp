@@ -24,9 +24,8 @@ using namespace logid::actions;
 const char* ThresholdGesture::interface_name = "OnRelease";
 
 ThresholdGesture::ThresholdGesture(
-        Device* device, config::ThresholdGesture& config,
-        const std::shared_ptr<ipcgull::node>& parent) :
-        Gesture(device, parent, interface_name), _config(config) {
+        Device* device, config::ThresholdGesture& config) :
+        Gesture(device, nullptr, interface_name), _config(config) {
     if (config.action) {
         try {
             _action = Action::makeAction(device, config.action.value(), _node);

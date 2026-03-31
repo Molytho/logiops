@@ -26,8 +26,7 @@ using namespace logid::actions;
 const char* ChangeDPI::interface_name = "ChangeDPI";
 
 ChangeDPI::ChangeDPI(
-        Device* device, config::ChangeDPI& config,
-        [[maybe_unused]] const std::shared_ptr<ipcgull::node>& parent) :
+        Device* device, config::ChangeDPI& config) :
         Action(device, interface_name), _config(config) {
     _dpi = _device->getFeature<features::DPI>("dpi");
     if (!_dpi)
