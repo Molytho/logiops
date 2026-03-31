@@ -28,19 +28,11 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git AND GIT_FOUND)
         set(LOGIOPS_VERSION git-${LOGIOPS_COMMIT_HASH})
     endif()
 
-    execute_process(COMMAND ${GIT_EXECUTABLE}
-            submodule update --init --recursive
-            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
     string(REGEX REPLACE "\n$" "" LOGIOPS_VERSION ${LOGIOPS_VERSION})
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/version.txt)
     file(READ version.txt LOGIOPS_VERSION)
     string(REGEX REPLACE "\n$" "" LOGIOPS_VERSION ${LOGIOPS_VERSION})
 
-endif()
-
-IF(NOT EXISTS ${PROJECT_SOURCE_DIR}/src/ipcgull)
-    message(FATAL_ERROR "Missing ipcgull submodule")
 endif()
 
 if(NOT LOGIOPS_VERSION)
@@ -54,5 +46,4 @@ if(USE_USER_BUS)
     add_definitions(-DUSE_USER_BUS)
 endif()
 
-add_subdirectory(src/ipcgull)
 add_subdirectory(src/logid)
