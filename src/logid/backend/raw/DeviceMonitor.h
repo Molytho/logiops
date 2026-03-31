@@ -25,6 +25,8 @@
 extern "C" {
     struct udev;
     struct udev_monitor;
+    struct udev_device;
+    struct udev_enumerate;
 }
 
 namespace logid::backend::raw {
@@ -32,6 +34,13 @@ namespace logid::backend::raw {
 
     constexpr int max_tries     = 5;
     constexpr int ready_backoff = 500;
+
+    struct UdevDelete {
+        void operator()(udev *ptr) const noexcept;
+        void operator()(udev_monitor *ptr) const noexcept;
+        void operator()(udev_device *ptr) const noexcept;
+        void operator()(udev_enumerate *ptr) const noexcept;
+    };
 
     class DeviceMonitor : public std::enable_shared_from_this<DeviceMonitor> {
     public:
@@ -56,11 +65,12 @@ namespace logid::backend::raw {
 
         void _removeHandler(const std::string &device);
 
+        int getMonitorFd() const noexcept;
+
         std::shared_ptr<IOMonitor> _io_monitor;
 
-        udev *_udev_context;
-        udev_monitor *_udev_monitor;
-        int _fd;
+        std::unique_ptr<udev, UdevDelete> _udev_context;
+        std::unique_ptr<udev_monitor, UdevDelete> _udev_monitor;
         bool _ready;
     };
 
@@ -75,11 +85,15 @@ namespace logid::backend::raw {
         }
 
         std::shared_ptr<T> shared_from_this() {
-            return std::dynamic_pointer_cast<T>(static_cast<T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this());
+            return std::dynamic_pointer_cast<T>(
+                static_cast<T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this()
+            );
         }
 
         std::shared_ptr<const T> shared_from_this() const {
-            return std::dynamic_pointer_cast<T>(static_cast<const T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this());
+            return std::dynamic_pointer_cast<T>(
+                static_cast<const T *>(this)->std::template enable_shared_from_this<DeviceMonitor>::shared_from_this()
+            );
         }
     };
 } // namespace logid::backend::raw
