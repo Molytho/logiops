@@ -22,8 +22,6 @@
 #include <backend/raw/DeviceMonitor.h>
 #include <Device.h>
 #include <Receiver.h>
-#include <ipcgull/node.h>
-#include <ipcgull/interface.h>
 
 namespace logid {
     class InputDevice;

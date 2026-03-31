@@ -19,6 +19,8 @@
 #define LOGID_CONFIG_SCHEMA_H
 
 #include <config/types.h>
+#include <cstdint>
+#include <optional>
 
 namespace logid::actions {
     class ChangeDPI;

@@ -29,7 +29,7 @@ const char* ChangeHostAction::interface_name = "ChangeHost";
 
 ChangeHostAction::ChangeHostAction(
         Device* device, config::ChangeHost& config)
-        : Action(device, interface_name), _config(config) {
+        : Action(device), _config(config) {
     if (_config.host.has_value()) {
         if (std::holds_alternative<std::string>(_config.host.value())) {
             auto& host = std::get<std::string>(_config.host.value());

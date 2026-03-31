@@ -28,7 +28,7 @@ const char* ToggleHiresScroll::interface_name = "ToggleHiresScroll";
 
 ToggleHiresScroll::ToggleHiresScroll(
         Device* dev) :
-        Action(dev, interface_name) {
+        Action(dev) {
     _hires_scroll = _device->getFeature<features::HiresScroll>("hiresscroll");
     if (!_hires_scroll)
         logPrintf(WARN, "%s:%d: HiresScroll feature not found, cannot use "

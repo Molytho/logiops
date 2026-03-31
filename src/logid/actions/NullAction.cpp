@@ -24,7 +24,7 @@ const char* NullAction::interface_name = "None";
 
 NullAction::NullAction(
         Device* device) :
-        Action(device, interface_name) {
+        Action(device) {
 }
 
 void NullAction::press() {

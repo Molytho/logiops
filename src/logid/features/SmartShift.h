@@ -20,7 +20,6 @@
 
 #include <features/DeviceFeature.h>
 #include <backend/hidpp20/features/SmartShift.h>
-#include <ipcgull/interface.h>
 #include <config/schema.h>
 #include <shared_mutex>
 

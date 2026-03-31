@@ -25,7 +25,7 @@ using namespace logid::actions;
 const char* ChangeProfile::interface_name = "ChangeProfile";
 
 ChangeProfile::ChangeProfile(Device* device, config::ChangeProfile& config) :
-        Action(device, interface_name), _config(config) {
+        Action(device), _config(config) {
 }
 
 void ChangeProfile::press() {

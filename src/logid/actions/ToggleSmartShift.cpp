@@ -29,7 +29,7 @@ const char* ToggleSmartShift::interface_name = "ToggleSmartShift";
 
 ToggleSmartShift::ToggleSmartShift(
         Device* dev) :
-        Action(dev, interface_name) {
+        Action(dev) {
     _smartshift = _device->getFeature<features::SmartShift>("smartshift");
     if (!_smartshift)
         logPrintf(WARN, "%s:%d: SmartShift feature not found, cannot use "

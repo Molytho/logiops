@@ -21,7 +21,6 @@
 #include <backend/hidpp20/features/AdjustableDPI.h>
 #include <features/DeviceFeature.h>
 #include <config/schema.h>
-#include <ipcgull/interface.h>
 #include <shared_mutex>
 
 namespace logid::features {

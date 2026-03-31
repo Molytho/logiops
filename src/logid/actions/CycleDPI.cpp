@@ -26,7 +26,7 @@ using namespace logid::actions;
 const char* CycleDPI::interface_name = "CycleDPI";
 
 CycleDPI::CycleDPI(Device* device, config::CycleDPI& config) :
-        Action(device, interface_name),
+        Action(device),
         _config(config) {
     _dpi = _device->getFeature<features::DPI>("dpi");
     if (!_dpi)

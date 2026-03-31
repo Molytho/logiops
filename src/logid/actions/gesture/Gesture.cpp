@@ -28,8 +28,7 @@
 using namespace logid;
 using namespace logid::actions;
 
-Gesture::Gesture(Device *device, [[maybe_unused]] std::shared_ptr<ipcgull::node> node,
-    [[maybe_unused]] const std::string &name) : _device(device) { }
+Gesture::Gesture(Device *device) : _device(device) { }
 
 namespace {
     template<typename T>
@@ -49,13 +48,11 @@ namespace {
     }
 } // namespace
 
-std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, config::Gesture &gesture,
-    const std::shared_ptr<ipcgull::node> &parent) {
+std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, config::Gesture &gesture) {
     return std::visit([&device](auto &&x) { return _makeGesture(device, x); }, gesture);
 }
 
-std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, const std::string &type,
-    config::Gesture &config, const std::shared_ptr<ipcgull::node> &parent) {
+std::shared_ptr<Gesture> Gesture::makeGesture(Device *device, const std::string &type, config::Gesture &config) {
     if (type == AxisGesture::interface_name) {
         config = config::AxisGesture();
     } else if (type == IntervalGesture::interface_name) {

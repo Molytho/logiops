@@ -27,7 +27,7 @@ const char* ChangeDPI::interface_name = "ChangeDPI";
 
 ChangeDPI::ChangeDPI(
         Device* device, config::ChangeDPI& config) :
-        Action(device, interface_name), _config(config) {
+        Action(device), _config(config) {
     _dpi = _device->getFeature<features::DPI>("dpi");
     if (!_dpi)
         logPrintf(WARN, "%s:%d: DPI feature not found, cannot use ChangeDPI action.",

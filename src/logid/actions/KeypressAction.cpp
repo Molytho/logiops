@@ -28,7 +28,7 @@ const char* KeypressAction::interface_name = "Keypress";
 
 KeypressAction::KeypressAction(
         Device* device, config::KeypressAction& config) :
-        Action(device, interface_name), _config(config) {
+        Action(device), _config(config) {
     _setConfig();
 }
 

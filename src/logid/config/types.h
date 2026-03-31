@@ -20,13 +20,13 @@
 
 #include <config/map.h>
 #include <config/group.h>
-#include <ipcgull/property.h>
 #include <libconfig.h++>
 #include <type_traits>
 #include <optional>
 #include <variant>
 #include <list>
 #include <set>
+#include <cstdint>
 
 // Containers are chosen specifically so that no iterator is invalidated.
 

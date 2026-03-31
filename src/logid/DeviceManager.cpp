@@ -23,6 +23,7 @@
 #include <sstream>
 #include <utility>
 #include <ipc_defs.h>
+#include <cassert>
 
 using namespace logid;
 using namespace logid::backend;

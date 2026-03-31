@@ -73,7 +73,7 @@ GestureAction::Direction GestureAction::toDirection(int32_t x, int32_t y) {
 }
 
 GestureAction::GestureAction(Device* dev, config::GestureAction& config) :
-        Action(dev, interface_name), _config(config) {
+        Action(dev), _config(config) {
     if (_config.gestures.has_value()) {
         auto& gestures = _config.gestures.value();
         for (auto&& x: gestures) {

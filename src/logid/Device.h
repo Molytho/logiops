@@ -22,8 +22,6 @@
 #include <features/DeviceFeature.h>
 #include <backend/hidpp20/Device.h>
 #include <backend/hidpp/defs.h>
-#include <ipcgull/node.h>
-#include <ipcgull/interface.h>
 #include <Configuration.h>
 
 namespace logid {

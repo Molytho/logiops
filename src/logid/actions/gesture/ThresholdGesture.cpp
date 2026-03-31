@@ -18,6 +18,7 @@
 #include <actions/gesture/ThresholdGesture.h>
 #include <Configuration.h>
 #include <util/log.h>
+#include <mutex>
 
 using namespace logid::actions;
 
@@ -25,10 +26,10 @@ const char* ThresholdGesture::interface_name = "OnRelease";
 
 ThresholdGesture::ThresholdGesture(
         Device* device, config::ThresholdGesture& config) :
-        Gesture(device, nullptr, interface_name), _config(config) {
+        Gesture(device), _config(config) {
     if (config.action) {
         try {
-            _action = Action::makeAction(device, config.action.value(), _node);
+            _action = Action::makeAction(device, config.action.value());
         } catch (InvalidAction& e) {
             logPrintf(WARN, "Mapping gesture to invalid action");
         }
@@ -82,5 +83,5 @@ void ThresholdGesture::setThreshold(int threshold) {
 void ThresholdGesture::setAction(const std::string& type) {
     std::unique_lock lock(_config_mutex);
     _action.reset();
-    _action = Action::makeAction(_device, type, _config.action, _node);
+    _action = Action::makeAction(_device, type, _config.action);
 }

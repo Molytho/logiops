@@ -18,6 +18,7 @@
 #include <actions/gesture/IntervalGesture.h>
 #include <Configuration.h>
 #include <util/log.h>
+#include <mutex>
 
 using namespace logid::actions;
 
@@ -25,11 +26,11 @@ const char* IntervalGesture::interface_name = "OnInterval";
 
 IntervalGesture::IntervalGesture(
         Device* device, config::IntervalGesture& config) :
-        Gesture(device, nullptr, interface_name),
+        Gesture(device),
         _axis(0), _interval_pass_count(0), _config(config) {
     if (config.action) {
         try {
-            _action = Action::makeAction(device, config.action.value(), _node);
+            _action = Action::makeAction(device, config.action.value());
         } catch (InvalidAction& e) {
             logPrintf(WARN, "Mapping gesture to invalid action");
         }
@@ -103,5 +104,5 @@ void IntervalGesture::setThreshold(int threshold) {
 void IntervalGesture::setAction(const std::string& type) {
     std::unique_lock lock(_config_mutex);
     _action.reset();
-    _action = Action::makeAction(_device, type, _config.action, _node);
+    _action = Action::makeAction(_device, type, _config.action);
 }

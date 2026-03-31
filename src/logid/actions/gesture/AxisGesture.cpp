@@ -26,7 +26,7 @@ using namespace logid::actions;
 const char* AxisGesture::interface_name = "Axis";
 
 AxisGesture::AxisGesture(Device* device, config::AxisGesture& config) :
-        Gesture(device, nullptr, interface_name), _multiplier(1), _config(config) {
+        Gesture(device), _multiplier(1), _config(config) {
     if (_config.axis.has_value()) {
         if (std::holds_alternative<uint>(_config.axis.value())) {
             _input_axis = std::get<uint>(_config.axis.value());

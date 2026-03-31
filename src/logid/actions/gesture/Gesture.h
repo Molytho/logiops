@@ -46,21 +46,16 @@ namespace logid::actions {
 
         virtual ~Gesture() = default;
 
-        static std::shared_ptr<Gesture> makeGesture(Device *device, config::Gesture &gesture,
-            const std::shared_ptr<ipcgull::node> &parent = nullptr);
+        static std::shared_ptr<Gesture> makeGesture(Device *device, config::Gesture &gesture);
 
         static std::shared_ptr<Gesture> makeGesture(Device *device, const std::string &type,
-            config::Gesture &gesture, const std::shared_ptr<ipcgull::node> &parent = nullptr);
+            config::Gesture &gesture);
 
     protected:
-        Gesture(Device *device, std::shared_ptr<ipcgull::node> parent, const std::string &name,
-            [[maybe_unused]] auto t) : Gesture(device, std::move(parent), name) { }
-
-        Gesture(Device *device, std::shared_ptr<ipcgull::node> parent, const std::string &name);
+        Gesture(Device *device);
 
         mutable std::shared_mutex _config_mutex;
 
-        const std::shared_ptr<ipcgull::node> _node = nullptr; //TODO: Needs to be deleted to that it can work
         Device *_device;
     };
 } // namespace logid::actions

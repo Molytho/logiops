@@ -83,8 +83,7 @@ namespace logid::actions {
 
 std::shared_ptr<Action> Action::makeAction(
         Device* device, const std::string& name,
-        std::optional<config::BasicAction>& config,
-        const std::shared_ptr<ipcgull::node>& parent) {
+        std::optional<config::BasicAction>& config) {
     auto ret = _makeAction(device, name, config);
     if (ret)
         ret->_self = ret;
@@ -93,8 +92,7 @@ std::shared_ptr<Action> Action::makeAction(
 
 std::shared_ptr<Action> Action::makeAction(
         Device* device, const std::string& name,
-        std::optional<config::Action>& config,
-        const std::shared_ptr<ipcgull::node>& parent) {
+        std::optional<config::Action>& config) {
     try {
         auto ret = _makeAction(device, name, config);
         if (ret)
@@ -110,8 +108,7 @@ std::shared_ptr<Action> Action::makeAction(
 }
 
 std::shared_ptr<Action> Action::makeAction(
-        Device* device, config::BasicAction& action,
-        const std::shared_ptr<ipcgull::node>& parent) {
+        Device* device, config::BasicAction& action) {
     std::shared_ptr<Action> ret;
     std::visit([&device, &ret](auto&& x) {
         ret = _makeAction(device, x);
@@ -122,10 +119,9 @@ std::shared_ptr<Action> Action::makeAction(
 }
 
 std::shared_ptr<Action> Action::makeAction(
-        Device* device, config::Action& action,
-        const std::shared_ptr<ipcgull::node>& parent) {
+        Device* device, config::Action& action) {
     std::shared_ptr<Action> ret;
-    std::visit([&device, &ret, &parent](auto&& x) {
+    std::visit([&device, &ret](auto&& x) {
         ret = _makeAction(device, x);
     }, action);
     if (ret)
@@ -133,6 +129,6 @@ std::shared_ptr<Action> Action::makeAction(
     return ret;
 }
 
-Action::Action(Device* device, [[maybe_unused]] const std::string& name) : // TODO: Remove name
+Action::Action(Device* device) : // TODO: Remove name
         _device(device), _pressed(false) {
 }
