@@ -26,7 +26,6 @@
 #include <actions/ChangeDPI.h>
 #include <actions/ChangeHostAction.h>
 #include <actions/ChangeProfile.h>
-#include <ipc_defs.h>
 
 using namespace logid;
 using namespace logid::actions;

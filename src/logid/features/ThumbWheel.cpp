@@ -20,7 +20,6 @@
 #include <actions/gesture/AxisGesture.h>
 #include <Device.h>
 #include <util/log.h>
-#include <ipc_defs.h>
 
 using namespace logid::features;
 using namespace logid::backend;

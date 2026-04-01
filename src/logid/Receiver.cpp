@@ -20,7 +20,6 @@
 #include <DeviceManager.h>
 #include <backend/Error.h>
 #include <util/log.h>
-#include <ipc_defs.h>
 
 using namespace logid;
 using namespace logid::backend;

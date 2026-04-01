@@ -15,116 +15,119 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <util/task.h>
-#include <queue>
-#include <optional>
+#include <algorithm>
 #include <cassert>
+#include <vector>
+
+#include <util/ExceptionHandler.h>
+#include <util/task.h>
 
 using namespace logid;
 using namespace std::chrono;
 
-struct task_less {
-private:
-    std::greater<> greater;
-public:
-    bool operator()(const task& a, const task& b) const {
-        return greater(a.time, b.time);
-    }
-};
+namespace {
+    struct task {
+        std::packaged_task<void()> task;
+        std::chrono::time_point<task_clock> at;
+    };
 
-static std::priority_queue<task, std::vector<task>, task_less> tasks {};
-static std::mutex task_mutex {};
-static std::condition_variable task_cv {};
-static std::atomic_bool workers_init = false;
-static std::atomic_bool workers_run = false;
+    class thread_pool {
+        std::mutex m_lock {};
+        std::condition_variable m_cv {};
 
-void stop_workers() {
-    std::unique_lock lock(task_mutex);
-    if (workers_init) {
-        workers_run = false;
-        lock.unlock();
-        task_cv.notify_all();
+        // TODO: Wrap in class
+        std::vector<task> m_queue {};
 
-        /* Wait for all workers to end */
-        lock.lock();
-    }
-}
+        bool m_running {true};
 
-void worker() {
-    std::unique_lock lock(task_mutex);
-    while (workers_run) {
-        task_cv.wait(lock, []() { return !tasks.empty() || !workers_run; });
+        std::vector<std::thread> m_threads {};
 
-        if (!workers_run)
-            break;
-
-        /* top task is in the future, wait */
-        if (tasks.top().time >= system_clock::now()) {
-            auto wait = tasks.top().time - system_clock::now();
-            task_cv.wait_for(lock, wait, []() {
-                return (!tasks.empty() && (tasks.top().time < system_clock::now())) ||
-                    !workers_run;
-            });
-
-            if (!workers_run)
-                break;
-        }
-
-        if (!tasks.empty()) {
-            /* May have timed out and is no longer empty */
-            auto f = tasks.top().function;
-            tasks.pop();
-
-            lock.unlock();
-            try {
-                f();
-            } catch(std::exception& e) {
-                ExceptionHandler::Default(e);
+    public:
+        thread_pool(size_t thread_count) {
+            m_threads.reserve(thread_count);
+            for (size_t i = 0; i < thread_count; i++) {
+                m_threads.emplace_back([this]() { this->worker(); });
             }
-            lock.lock();
         }
-    }
-}
+
+        ~thread_pool() {
+            {
+                std::lock_guard guard {m_lock};
+                m_running = false;
+            }
+
+            m_cv.notify_all();
+
+            for (std::thread &t : m_threads) {
+                t.join();
+            }
+        }
+
+        void push_task(task &&task) {
+            push_queue(std::move(task));
+            m_cv.notify_one();
+        }
+
+    private:
+        void worker() noexcept {
+            std::packaged_task<void()> task;
+            while ((task = pop_task()).valid()) {
+                try {
+                    task();
+                } catch (...) {
+                    ExceptionHandler::Default(std::current_exception());
+                }
+            }
+        }
+
+        std::packaged_task<void()> pop_task() {
+            std::unique_lock lock {m_lock};
+            while (true) {
+                while (m_running && !is_task_ready()) {
+                    if (m_queue.empty()) {
+                        m_cv.wait(lock);
+                    } else {
+                        m_cv.wait_until(lock, m_queue.front().at);
+                    }
+                }
+                if (!m_running) {
+                    return {};
+                }
+                return pop_queue().task;
+            }
+        }
+
+        bool is_task_ready() const noexcept {
+            return !m_queue.empty() && m_queue.front().at < task_clock::now();
+        }
+
+        void push_queue(task &&task) {
+            m_queue.push_back(std::move(task));
+            std::ranges::push_heap(m_queue, std::greater<> {}, [](const struct task &t) {
+                return t.at;
+            });
+        }
+
+        task pop_queue() noexcept {
+            assert(!m_queue.empty());
+            std::ranges::pop_heap(m_queue, std::greater<> {}, [](const struct task &t) {
+                return t.at;
+            });
+            auto value = std::move(m_queue.back());
+            m_queue.pop_back();
+            return value;
+        }
+    };
+
+    std::unique_ptr<thread_pool> worker_pool;
+} // namespace
 
 void logid::init_workers(int worker_count) {
-    std::lock_guard lock(task_mutex);
-    assert(!workers_init);
-
-    for (int i = 0; i < worker_count; ++i)
-        std::thread(&worker).detach();
-
-    workers_init = true;
-    workers_run = true;
-
-    atexit(&stop_workers);
+    assert(!worker_pool);
+    worker_pool = std::make_unique<thread_pool>(worker_count);
 }
 
-void logid::run_task(std::function<void()> function) {
-    task t{
-            .function = std::move(function),
-            .time = std::chrono::system_clock::now()
-    };
-
-    run_task(t);
-}
-
-void logid::run_task_after(std::function<void()> function, std::chrono::milliseconds delay) {
-    task t{
-            .function = std::move(function),
-            .time = system_clock::now() + delay
-    };
-
-    run_task(t);
-}
-
-void logid::run_task(task t) {
-    std::lock_guard lock(task_mutex);
-
-    if (!workers_init) {
-        throw std::runtime_error("tasks queued before work queue ready");
-    }
-
-    tasks.emplace(std::move(t));
-    // TODO: only need to wake up at top
-    task_cv.notify_one();
+void logid::run_task(std::packaged_task<void()> task, std::chrono::time_point<task_clock> at) {
+    assert(worker_pool);
+    worker_pool->push_task({std::move(task), at});
 }

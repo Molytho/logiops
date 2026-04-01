@@ -17,7 +17,6 @@
  */
 #include <features/SmartShift.h>
 #include <Device.h>
-#include <ipc_defs.h>
 
 using namespace logid::features;
 using namespace logid::backend;

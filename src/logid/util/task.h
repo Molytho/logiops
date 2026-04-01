@@ -18,22 +18,25 @@
 #ifndef LOGID_TASK_H
 #define LOGID_TASK_H
 
-#include <util/ExceptionHandler.h>
-#include <functional>
-#include <memory>
 #include <future>
 
 namespace logid {
-    struct task {
-        std::function<void()> function;
-        std::chrono::time_point<std::chrono::system_clock> time;
-    };
+    using task_clock = std::chrono::system_clock;
 
     void init_workers(int worker_count);
 
-    void run_task(std::function<void()> function);
-    void run_task_after(std::function<void()> function, std::chrono::milliseconds delay);
-    void run_task(task t);
-}
+    void run_task(std::packaged_task<void()> task,
+        std::chrono::time_point<task_clock> at = task_clock::now());
 
-#endif //LOGID_TASK_H
+    template<class F>
+    void run_task(F &&func) {
+        run_task(std::packaged_task<void()>(std::forward<F>(func)));
+    }
+
+    template<class F>
+    void run_task_after(F &&func, std::chrono::milliseconds delay) {
+        run_task(std::packaged_task<void()>(std::forward<F>(func)), task_clock::now() + delay);
+    }
+} // namespace logid
+
+#endif // LOGID_TASK_H

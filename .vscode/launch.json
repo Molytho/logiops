@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Launch",
+            "program": "${workspaceFolder}/build/logid",
+            "args": [],
+            "cwd": "${workspaceFolder}/build/",
+            "preLaunchTask": "Build"
+        }
+    ]
+}

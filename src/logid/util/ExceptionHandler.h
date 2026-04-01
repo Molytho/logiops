@@ -18,10 +18,10 @@
 #ifndef LOGID_EXCEPTIONHANDLER_H
 #define LOGID_EXCEPTIONHANDLER_H
 
-#include <stdexcept>
+#include <exception>
 
 namespace logid::ExceptionHandler {
-    void Default(std::exception& e);
+    void Default(std::exception_ptr e);
 }
 
-#endif //LOGID_EXCEPTIONHANDLER_H
+#endif // LOGID_EXCEPTIONHANDLER_H

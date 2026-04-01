@@ -19,7 +19,6 @@
 #include <DeviceManager.h>
 #include <backend/Error.h>
 #include <cassert>
-#include <ipc_defs.h>
 #include <sstream>
 #include <thread>
 #include <util/log.h>

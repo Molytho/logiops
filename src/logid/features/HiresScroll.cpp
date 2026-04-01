@@ -19,7 +19,6 @@
 #include <actions/gesture/AxisGesture.h>
 #include <Device.h>
 #include <InputDevice.h>
-#include <ipc_defs.h>
 
 using namespace logid;
 using namespace logid::features;

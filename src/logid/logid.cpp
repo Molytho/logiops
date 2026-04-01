@@ -16,13 +16,12 @@
  *
  */
 
-#include <DeviceManager.h>
-#include <InputDevice.h>
-#include <ipc_defs.h>
 #include <string>
-#include <string_view>
-#include <util/log.h>
-#include <util/task.h>
+
+#include "DeviceManager.h"
+#include "InputDevice.h"
+#include "util/log.h"
+#include "util/task.h"
 
 #ifndef LOGIOPS_VERSION
 # define LOGIOPS_VERSION "null"

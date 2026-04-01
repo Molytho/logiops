@@ -22,7 +22,6 @@
 #include <actions/gesture/NullGesture.h>
 #include <actions/gesture/ReleaseGesture.h>
 #include <actions/gesture/ThresholdGesture.h>
-#include <ipc_defs.h>
 #include <utility>
 
 using namespace logid;

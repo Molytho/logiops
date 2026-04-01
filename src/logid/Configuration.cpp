@@ -20,7 +20,6 @@
 #include <util/log.h>
 #include <utility>
 #include <filesystem>
-#include <ipc_defs.h>
 
 using namespace logid;
 using namespace libconfig;

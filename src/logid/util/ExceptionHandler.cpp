@@ -15,24 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <util/ExceptionHandler.h>
-#include <system_error>
-#include <util/log.h>
 #include <backend/hidpp10/Error.h>
 #include <backend/hidpp20/Error.h>
+#include <system_error>
+#include <util/ExceptionHandler.h>
+#include <util/log.h>
 
 using namespace logid;
 
-void ExceptionHandler::Default(std::exception& error) {
+void ExceptionHandler::Default(std::exception_ptr e) {
     try {
-        throw error;
-    } catch (backend::hidpp10::Error& e) {
-        logPrintf(WARN, "HID++ 1.0 error ignored on task: %s", error.what());
-    } catch (backend::hidpp20::Error& e) {
-        logPrintf(WARN, "HID++ 2.0 error ignored on task: %s", error.what());
-    } catch (std::system_error& e) {
-        logPrintf(WARN, "System error ignored on task: %s", error.what());
-    } catch (std::exception& e) {
-        logPrintf(WARN, "Error ignored on task: %s", error.what());
+        if (e) {
+            std::rethrow_exception(e);
+        }
+    } catch (backend::hidpp10::Error &e) {
+        logPrintf(WARN, "HID++ 1.0 error ignored on task: %s", e.what());
+    } catch (backend::hidpp20::Error &e) {
+        logPrintf(WARN, "HID++ 2.0 error ignored on task: %s", e.what());
+    } catch (std::system_error &e) {
+        logPrintf(WARN, "System error ignored on task: %s", e.what());
+    } catch (std::exception &e) {
+        logPrintf(WARN, "Error ignored on task: %s", e.what());
+    } catch (...) {
+        logPrintf(ERROR, "Caught unknown error in tasks");
+        std::abort();
     }
 }
