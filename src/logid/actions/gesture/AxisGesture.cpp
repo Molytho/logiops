@@ -34,7 +34,7 @@ AxisGesture::AxisGesture(Device* device, config::AxisGesture& config) :
             const auto& axis = std::get<std::string>(_config.axis.value());
             try {
                 _input_axis = _device->virtualInput()->toAxisCode(axis);
-            } catch (InputDevice::InvalidEventCode& e) {
+            } catch (const InvalidEventCode &e) {
                 logPrintf(WARN, "Invalid axis %s.");
             }
         }

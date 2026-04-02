@@ -60,7 +60,7 @@ void KeypressAction::_setConfig() {
             auto code = _device->virtualInput()->toKeyCode(key);
             _device->virtualInput()->registerKey(code);
             _keys.emplace_back(code);
-        } catch (InputDevice::InvalidEventCode& e) {
+        } catch (const InvalidEventCode &e) {
             logPrintf(WARN, "Invalid keycode %s, skipping.", key.c_str());
         }
     } else if (std::holds_alternative<uint>(_config.keys.value())) {
@@ -78,7 +78,7 @@ void KeypressAction::_setConfig() {
                     auto code = _device->virtualInput()->toKeyCode(key_str);
                     _device->virtualInput()->registerKey(code);
                     _keys.emplace_back(code);
-                } catch (InputDevice::InvalidEventCode& e) {
+                } catch (const InvalidEventCode &e) {
                     logPrintf(WARN, "Invalid keycode %s, skipping.",
                               key_str.c_str());
                 }

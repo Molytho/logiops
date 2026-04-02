@@ -19,34 +19,31 @@
 #ifndef LOGID_INPUTDEVICE_H
 #define LOGID_INPUTDEVICE_H
 
+#include <bitset>
 #include <memory>
-#include <string>
 #include <mutex>
+#include <stdexcept>
+#include <string>
 
-extern "C"
-{
-#include <libevdev/libevdev.h>
 #include <libevdev/libevdev-uinput.h>
-}
+#include <libevdev/libevdev.h>
 
 namespace logid {
+    class InvalidEventCode : public std::runtime_error {
+    public:
+        explicit InvalidEventCode(const std::string &name);
+
+        explicit InvalidEventCode(uint code);
+    };
+
+    struct EvdevDelete {
+        void operator()(libevdev *ptr) const noexcept;
+        void operator()(libevdev_uinput *ptr) const noexcept;
+    };
+
     class InputDevice {
     public:
-        class InvalidEventCode : public std::exception {
-        public:
-            explicit InvalidEventCode(const std::string& name);
-
-            explicit InvalidEventCode(uint code);
-
-            const char* what() const noexcept override;
-
-        private:
-            const std::string _what;
-        };
-
-        explicit InputDevice(const char* name);
-
-        ~InputDevice();
+        explicit InputDevice(const char *name);
 
         void registerKey(uint code);
 
@@ -60,11 +57,11 @@ namespace logid {
 
         static std::string toKeyName(uint code);
 
-        static uint toKeyCode(const std::string& name);
+        static uint toKeyCode(const std::string &name);
 
         static std::string toAxisName(uint code);
 
-        static uint toAxisCode(const std::string& name);
+        static uint toAxisCode(const std::string &name);
 
         static int getLowResAxis(uint axis_code);
 
@@ -75,15 +72,15 @@ namespace logid {
 
         static std::string _toEventName(uint type, uint code);
 
-        static uint _toEventCode(uint type, const std::string& name);
+        static uint _toEventCode(uint type, const std::string &name);
 
-        bool registered_keys[KEY_CNT]{};
-        bool registered_axis[REL_CNT]{};
-        libevdev* device;
-        libevdev_uinput* ui_device{};
+        std::bitset<KEY_CNT> registered_keys {};
+        std::bitset<REL_CNT> registered_axis {};
+        std::unique_ptr<libevdev, EvdevDelete> device;
+        std::unique_ptr<libevdev_uinput, EvdevDelete> ui_device {};
 
         std::mutex _input_mutex;
     };
-}
+} // namespace logid
 
-#endif //LOGID_INPUTDEVICE_H
+#endif // LOGID_INPUTDEVICE_H
