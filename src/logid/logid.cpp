@@ -16,6 +16,7 @@
  *
  */
 
+#include <signal.h>
 #include <string>
 
 #include "DeviceManager.h"
@@ -174,7 +175,13 @@ int main(int argc, char **argv) {
 
     device_manager->enumerate();
 
-    while (true);
+    int sig {};
+    sigset_t sigset {};
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGTERM);
+    sigaddset(&sigset, SIGINT);
+    sigprocmask(SIG_BLOCK, &sigset, nullptr);
+    sigwait(&sigset, &sig);
 
     return EXIT_SUCCESS;
 }
